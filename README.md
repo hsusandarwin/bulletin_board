@@ -1,16 +1,27 @@
 # bulletin_board
 
-A new Flutter project.
+### Setup Flutter Version Management (FVM)
 
-## Getting Started
+fvm install 3.35.3
 
-This project is a starting point for a Flutter application.
+fvm use 3.35.3
 
-A few resources to get you started if this is your first Flutter project:
+flutter clean
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+fvm flutter pub get
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Running Build Runner for Code Generation
+
+```shell
+fvm flutter pub run build_runner build --delete-conflicting-outputs
+or
+flutter pub run build_runner build --delete-conflicting-output
+```
+
+### Run Project In Development
+
+```shell
+fvm flutter run 
+```
+
