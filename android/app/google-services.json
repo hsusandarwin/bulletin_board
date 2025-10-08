@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280339459414",
+    "project_id": "bulletin-board-7a91a",
+    "storage_bucket": "bulletin-board-7a91a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280339459414:android:3653890566b7888388baf7",
+        "android_client_info": {
+          "package_name": "com.hsw.bulletin_board"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApKy7oXt0hk60WAPEb8Tg2USDnDpTZD5Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,25 @@
+import 'dart:typed_data';
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'todo_state.freezed.dart';
+
+@freezed
+abstract class TodoState with _$TodoState {
+  const factory TodoState({
+    @Default('') String? id,
+    @Default('') String title,
+    @Default('') String description,
+    @Default(true) bool isPublish,
+    @Default('') String uid,
+    @Default('') String? image,
+    @Default(0) int likesCount,
+    @Default([]) List<String> likedByUsers,
+    @Default('') String? latitude,
+    @Default('') String? longitude,
+    @Default('') String? location,
+    Uint8List? imageData,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) = _TodoState;
+}
