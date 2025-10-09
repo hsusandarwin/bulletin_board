@@ -2,6 +2,7 @@
 
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
+import 'package:bulletin_board/presentation/profile/profile.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/language/language.dart';
@@ -35,12 +36,27 @@ class SettingPage extends HookConsumerWidget {
     final todoListStateNotifier = ref.watch(todoNotifierProvider.notifier);
     
     return Scaffold(
-      
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.setting,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
+        backgroundColor: Colors.grey[300],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextButton.icon(
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+              }, 
+              label: Text(AppLocalizations.of(context)!.profile,style: TextStyle(fontSize: 20),),
+              icon: Icon(Icons.person,size: 40,),
+            ),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 20,
+            ),
             Row(
               children: [
                 Text(AppLocalizations.of(context)!.darkmode, style: const TextStyle(fontSize: 18)),
@@ -57,7 +73,11 @@ class SettingPage extends HookConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 20,
+            ),
             Row(
               children: [
                 Text(AppLocalizations.of(context)!.language, style: const TextStyle(fontSize: 18)),
@@ -78,7 +98,11 @@ class SettingPage extends HookConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 20,
+            ),
             TextButton.icon(
               onPressed: () async {
                 // ignore: dead_code, unnecessary_null_comparison
@@ -140,6 +164,11 @@ class SettingPage extends HookConsumerWidget {
                   color: Colors.red,
                 ),
               ),
+            ),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 20,
             ),
           ],
         ),
