@@ -73,7 +73,11 @@ class TodoRepositoryImpl implements BaseTodoRepository {
       updatedAt: DateTime.now(),
     );
 
-    await _todoDB.doc(newId).set(todo.toJson());
+    await _todoDB.doc(newId).set({
+      ...todo.toJson(),
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
     return todo;
   }
 
@@ -83,7 +87,7 @@ class TodoRepositoryImpl implements BaseTodoRepository {
     try {
       final user = auth.FirebaseAuth.instance.currentUser;
       final snapshotData = _todoDB 
-          .where('likedByUsers', arrayContains: user!.uid) 
+          .where('likedByUsers', arrayContains: user!.uid)
           .limit(5) 
           .snapshots();
 

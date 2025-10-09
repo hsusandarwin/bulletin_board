@@ -34,6 +34,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final todosStream = FirebaseFirestore.instance
       .collection('todos')
       .where('uid', isEqualTo: currentUser?.uid)
+      .orderBy('createdAt',descending: true)
       .snapshots();
 
     final likedStream = FirebaseFirestore.instance

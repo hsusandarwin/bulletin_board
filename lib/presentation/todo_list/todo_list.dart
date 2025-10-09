@@ -45,6 +45,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
     final todosStream = FirebaseFirestore.instance
     .collection('todos')
     .where('isPublish', isEqualTo: true)
+    .orderBy('createdAt',descending: true)
     .snapshots();
 
     final currentUser = FirebaseAuth.instance.currentUser;

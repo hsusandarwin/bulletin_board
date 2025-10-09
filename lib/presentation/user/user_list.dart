@@ -17,8 +17,11 @@ class UserListPage extends ConsumerStatefulWidget {
 }
 
 class _UserListPageState extends ConsumerState<UserListPage> {
-  final CollectionReference usersCollection =
-      FirebaseFirestore.instance.collection('users');
+  final Stream<QuerySnapshot<Map<String, dynamic>>> usersCollection = FirebaseFirestore.instance
+  .collection('users')
+  .orderBy('createdAt',descending: true)
+  .snapshots();
+  
       String searchQuery = "";
 
       String insertLineBreaks(String text, {int limit = 28}) {
@@ -57,7 +60,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: usersCollection.snapshots(),
+              stream: usersCollection,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
