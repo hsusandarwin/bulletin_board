@@ -44,7 +44,6 @@ class _UserListPageState extends ConsumerState<UserListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.userList,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
-        backgroundColor: Colors.grey[300],
       ),
       body: Column(
         children: [

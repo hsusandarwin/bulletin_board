@@ -38,30 +38,42 @@ class SettingPage extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.setting,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
-        backgroundColor: Colors.grey[300],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextButton.icon(
-              onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()));
-              }, 
-              label: Text(AppLocalizations.of(context)!.profile,style: TextStyle(fontSize: 20),),
-              icon: Icon(Icons.person,size: 40,),
+            Container(
+              decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: Colors.grey
+                  ),
+              child: ListTile(
+                leading: const Icon(Icons.password,size: 35,color: Colors.white,),
+                title: Text(AppLocalizations.of(context)!.password),
+                titleTextStyle: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 17,color: Colors.white),
+                onTap: () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()))
+              ),
             ),
             Divider(
               color: Colors.grey,
               thickness: 1,
               height: 20,
             ),
-            Row(
-              children: [
-                Text(AppLocalizations.of(context)!.darkmode, style: const TextStyle(fontSize: 18)),
-                const SizedBox(width: 30),
-                Switch(
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: Colors.grey, 
+              ),
+              child: ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.darkmode,
+                  style: const TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),
+                ),
+                trailing: Switch(
                   value: isDark,
                   onChanged: (enable) {
                     if (enable) {
@@ -71,18 +83,24 @@ class SettingPage extends HookConsumerWidget {
                     }
                   },
                 ),
-              ],
+              ),
             ),
             Divider(
               color: Colors.grey,
               thickness: 1,
               height: 20,
             ),
-            Row(
-              children: [
-                Text(AppLocalizations.of(context)!.language, style: const TextStyle(fontSize: 18)),
-                const SizedBox(width: 20),
-                DropdownButton<Language>(
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: Colors.grey,
+              ),
+              child: ListTile(
+                title: Text(
+                  AppLocalizations.of(context)!.language,
+                  style: const TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),
+                ),
+                trailing: DropdownButton<Language>(
                   value: languageState.language,
                   items: Language.values.map((lang) {
                     return DropdownMenuItem(
@@ -96,7 +114,7 @@ class SettingPage extends HookConsumerWidget {
                     }
                   },
                 ),
-              ],
+              ),
             ),
             Divider(
               color: Colors.grey,
@@ -170,9 +188,34 @@ class SettingPage extends HookConsumerWidget {
               thickness: 1,
               height: 20,
             ),
+            TextButton.icon(
+              onPressed: () {
+              showConfirmationDialog(
+                context: context,
+                title: AppLocalizations.of(context)!.confirmLogout,
+                confirmText: AppLocalizations.of(context)!.logout,
+                confirmIcon: Icons.logout,
+                confirmColor: Colors.red,
+                onConfirm: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  );
+                },
+              );
+            },
+              icon: const Icon(Icons.logout_rounded,color: Colors.red,), 
+              label: Text(AppLocalizations.of(context)!.logout,style: TextStyle(color: Colors.red,fontSize: 18),),
+            ),
+             Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 20,
+            ),
           ],
         ),
       ),
     );
   }
 }
+
