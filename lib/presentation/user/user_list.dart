@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class UserListPage extends ConsumerStatefulWidget {
   const UserListPage({super.key});
@@ -101,6 +102,14 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                     final password = '********';
                     final address = userData['address'] ?? 'No Address';
                     final role = (userData['role'] == true) ? 'admin' : 'user';
+                    final createdAt = userData['createdAt'];
+                    DateTime? createdAtDate;
+
+                    if (createdAt is Timestamp) {
+                      createdAtDate = createdAt.toDate();
+                    } else if (createdAt is DateTime) {
+                      createdAtDate = createdAt;
+                    }
             
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -132,6 +141,21 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                     color: role == 'admin' ? Colors.red : Colors.blue,
                                     fontWeight: FontWeight.bold,
                                   )),
+                               Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 1),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.calendar_today),
+                                    SizedBox(width: 3),
+                                    Text(
+                                      createdAtDate != null
+                                          ? DateFormat('dd/MM/yyyy').format(createdAtDate)
+                                          : '',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                            Column(

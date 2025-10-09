@@ -246,4 +246,7 @@ class AppLocalizationsMy extends AppLocalizations {
 
   @override
   String get checkVerify => 'အီးမေးလ်အတည်ပြုမှုကို စစ်ဆေးရန်';
+
+  @override
+  String get joined => 'ပါဝင်သည့်ရက်စွဲ - ';
 }

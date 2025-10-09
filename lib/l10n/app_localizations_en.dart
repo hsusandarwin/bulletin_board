@@ -245,4 +245,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkVerify => 'Check if Email is Verified';
+
+  @override
+  String get joined => 'Joined - ';
 }

@@ -245,4 +245,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get checkVerify => '이메일 인증 상태 확인';
+
+  @override
+  String get joined => '가입일 - ';
 }

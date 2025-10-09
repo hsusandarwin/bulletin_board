@@ -78,5 +78,6 @@
   "verify": "メールを確認する",
   "resendEmail": "確認メールを再送する",
   "successVerify": "メールの確認が完了しました。",
-  "checkVerify": "メール確認状況を確認する"
+  "checkVerify": "メール確認状況を確認する",
+  "joined": "参加日 - "
 }

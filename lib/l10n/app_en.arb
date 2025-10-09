@@ -78,5 +78,6 @@
   "verify": "Verify Email",
   "resendEmail": "Resend Verification Email",
   "successVerify": "Your email verification is successful.",
-  "checkVerify": "Check if Email is Verified"
+  "checkVerify": "Check if Email is Verified",
+  "joined": "Joined - "
 }

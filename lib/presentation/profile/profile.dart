@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulHookConsumerWidget {
   const ProfilePage({super.key});
@@ -111,6 +112,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     setState(() {});
   }
+  
 
   Future<void> _changePasswordDialog() async {
     final oldPasswordController = TextEditingController();
@@ -362,6 +364,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onEdit: () {},
               isPassword: true,
               onPasswordEdit: _changePasswordDialog,
+            ),
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(AppLocalizations.of(context)!.joined,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  SizedBox(width: 3),
+                  Icon(Icons.calendar_today),
+                  Text(
+                    DateFormat('dd/MM/yyyy')
+                        .format(_currentUser.metadata.creationTime!),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 40),
             TextButton.icon(

@@ -78,5 +78,6 @@
   "verify": "이메일 인증",
   "resendEmail": "인증 이메일 다시 보내기",
   "successVerify": "이메일 인증이 완료되었습니다.",
-  "checkVerify": "이메일 인증 상태 확인"
+  "checkVerify": "이메일 인증 상태 확인",
+  "joined": "가입일 - "
 }

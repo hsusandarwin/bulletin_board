@@ -575,6 +575,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check if Email is Verified'**
   String get checkVerify;
+
+  /// No description provided for @joined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined - '**
+  String get joined;
 }
 
 class _AppLocalizationsDelegate

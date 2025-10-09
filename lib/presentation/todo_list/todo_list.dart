@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:bulletin_board/presentation/todo_list/widgets/todo_add.dart';
+import 'package:intl/intl.dart';
 
 class ToDoListPage extends StatefulHookConsumerWidget {
   const ToDoListPage({super.key});
@@ -236,6 +237,15 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
             
                   final List likedBy = todo['likedByUsers'] ?? [];
                   final isFavorite = likedBy.contains(currentUser?.uid);
+
+                  final createdAt = todo['createdAt'];
+                  DateTime? createdAtDate;
+
+                  if (createdAt is Timestamp) {
+                    createdAtDate = createdAt.toDate();
+                  } else if (createdAt is DateTime) {
+                    createdAtDate = createdAt;
+                  }
             
                 return Card(
                   shadowColor: Colors.red,
@@ -290,6 +300,21 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                             ],
                           ),
                         ),
+                        Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today),
+                            SizedBox(width: 3),
+                            Text(
+                              createdAtDate != null
+                                  ? DateFormat('dd/MM/yyyy').format(createdAtDate)
+                                  : '',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
@@ -326,7 +351,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                                   ),
                                 ),
                         ),
-                      ),
+                      ), 
                       if (currentUser != null && currentUser.displayName == todoUserName)
                       Padding(
                         padding: const EdgeInsets.all(5.0),

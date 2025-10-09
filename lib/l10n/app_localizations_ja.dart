@@ -245,4 +245,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get checkVerify => 'メール確認状況を確認する';
+
+  @override
+  String get joined => '参加日 - ';
 }
