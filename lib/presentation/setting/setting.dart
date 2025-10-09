@@ -50,8 +50,8 @@ class SettingPage extends HookConsumerWidget {
                     color: Colors.grey
                   ),
               child: ListTile(
-                leading: const Icon(Icons.password,size: 35,color: Colors.white,),
-                title: Text(AppLocalizations.of(context)!.password),
+                leading: const Icon(Icons.person,size: 35,color: Colors.white,),
+                title: Text(AppLocalizations.of(context)!.profile),
                 titleTextStyle: TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 17,color: Colors.white),
                 onTap: () =>
