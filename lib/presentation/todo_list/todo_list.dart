@@ -51,11 +51,29 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
     .orderBy('createdAt',descending: true)
     .snapshots();
 
+    final currentUid = FirebaseAuth.instance.currentUser!.uid;
+
+    return StreamBuilder<DocumentSnapshot>(
+    stream: FirebaseFirestore.instance.collection('users').doc(currentUid).snapshots(),
+    builder: (context, userSnapshot) {
+      if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+
     final currentUser = FirebaseAuth.instance.currentUser;
+    final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+    final bool isAdmin = userData['role'] ?? false;
               
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.adminHomePage,style: const TextStyle(fontSize: 20),),
+       title: Text(
+          isAdmin
+                ? AppLocalizations.of(context)!.adminHomePage
+                : AppLocalizations.of(context)!.userHomePage,
+            style: const TextStyle(fontSize: 20),
+        ),
         automaticallyImplyLeading: false,
         actions: [
           Container(
@@ -160,6 +178,8 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
         backgroundColor: Colors.grey,
         child: const Icon(Icons.add, size: 28,color: Colors.white,),
       ),
+    );
+    }
     );
   }
 
