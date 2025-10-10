@@ -110,7 +110,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         .doc(_userId)
         .update({'address': newAddress});
 
-    setState(() {});
+    setState(()  => _isEditingAddress = false);
   }
   
 

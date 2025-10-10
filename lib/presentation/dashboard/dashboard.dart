@@ -45,6 +45,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(AppLocalizations.of(context)!.dashboard,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
       ),
       body: StreamBuilder<QuerySnapshot>(

@@ -43,6 +43,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(AppLocalizations.of(context)!.userList,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
       ),
       body: Column(

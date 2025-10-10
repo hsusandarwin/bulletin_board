@@ -37,6 +37,7 @@ class SettingPage extends HookConsumerWidget {
     
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(AppLocalizations.of(context)!.setting,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
       ),
       body: Padding(
