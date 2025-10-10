@@ -40,7 +40,7 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
     super.initState();
     _emailcontroller = TextEditingController(text: widget.userData['email'] ?? '');
     _namecontroller = TextEditingController(text: widget.userData['displayName'] ?? '');
-    _pswcontroller = TextEditingController(text: '********');
+    _pswcontroller = TextEditingController(text: widget.userData['password'] ?? '');
     _addresscontroller = TextEditingController(text: widget.userData['address'] ?? '');
     role = (widget.userData['role'] == true) ? "Admin" : "User";
   }
@@ -132,7 +132,7 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                     child: CustomTextField(
                       controller: _pswcontroller,
                       label: AppLocalizations.of(context)!.password,
-                      isRequired: true,
+                      isRequired: false,
                       maxLength: 26,
                       obscured: !isPasswordVisible,
                       validator: (value) => Validators.validatePassword(
