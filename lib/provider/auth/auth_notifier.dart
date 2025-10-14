@@ -3,6 +3,7 @@ import 'package:bulletin_board/presentation/storage/provider_setting.dart';
 import 'package:bulletin_board/provider/auth/auth_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -14,7 +15,6 @@ final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
   ) async {
     logger.e('user --> $user');
     if (user != null && !user.emailVerified) {
-      logger.e('user mail --> ${user.email}');
       await user.reload();
       return auth.FirebaseAuth.instance.currentUser;
     }
@@ -127,41 +127,62 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> loginWithGoogle() async {
-    state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
+  state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
 
-    try {
-      await _googleSignIn.signOut();
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        state = state.copyWith(isLoading: false);
-        return;
-      }
-
-      final email = googleUser.email;
-      final existingUser = await _userRepository.getUserByEmail(email);
-      if (existingUser == null) {
-        await _googleSignIn.signOut();
-        state = state.copyWith(
-          isLoading: false,
-          isSuccess: false,
-          errorMsg: 'Email is not registered',
-        );
-        return;
-      }
-      state = state.copyWith(
-        user: existingUser,
-        isLoading: false,
-        isSuccess: true,
-        errorMsg: '',
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        isSuccess: false,
-        errorMsg: 'Google login failed: $e',
-      );
+  try {
+    await _googleSignIn.signOut(); 
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      state = state.copyWith(isLoading: false);
+      return;
     }
+
+    final googleAuth = await googleUser.authentication;
+
+    final credential = firebase_auth.GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final firebaseUserCred = await firebase_auth.FirebaseAuth.instance
+        .signInWithCredential(credential);
+    final firebaseUser = firebaseUserCred.user;
+    if (firebaseUser == null) {
+      throw Exception("Failed to sign in with Google");
+    }
+
+    final email = firebaseUser.email ?? '';
+    var existingUser = await _userRepository.getUserByEmail(email);
+
+    if (existingUser == null) {
+      existingUser = User(
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName ?? '',
+        email: email,
+        password: '',
+        role: false,
+        address: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await _userRepository.saveUserToFirestore(existingUser);
+    }
+
+    state = state.copyWith(
+      user: existingUser,
+      isLoading: false,
+      isSuccess: true,
+      errorMsg: '',
+    );
+  } catch (e) {
+    state = state.copyWith(
+      isLoading: false,
+      isSuccess: false,
+      errorMsg: 'Google login failed: $e',
+    );
   }
+}
 
   Future<void> sendVerificationEmail() async {
     state = state.copyWith(isLoading: true);
@@ -264,7 +285,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(user: newUser);
     } else {
       // Update any necessary provider data
-      // await _userRepository.updateUser(user);
+      await _userRepository.updateProvider(user);
       state = state.copyWith(user: user);
     }
   }

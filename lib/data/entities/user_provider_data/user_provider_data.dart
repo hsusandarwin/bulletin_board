@@ -9,9 +9,7 @@ abstract class UserProviderData with _$UserProviderData {
     @Default('') String uid,
     @Default('') String email,
     @Default('') String name,
-    @Default('') String password,
-    @Default(false) bool role,
-    @Default('') String address,
+    @Default('') String providerType,
     @Default('') String photo,
   }) = _UserProviderData; 
 

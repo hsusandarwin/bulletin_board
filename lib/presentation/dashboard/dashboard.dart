@@ -3,6 +3,7 @@ import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/todo_list/widgets/todo_update.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
+import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +19,6 @@ class DashboardPage extends StatefulHookConsumerWidget {
 }
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
-  Future<String> _getUserName(String uid) async {
-    final userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    if (userDoc.exists && userDoc.data()!.containsKey('displayName')) {
-      return userDoc['displayName'];
-    }
-    return "Unknown";
-  }
 
   bool isFavorite = false;
 
@@ -185,9 +178,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       final todoUid = todo['uid'];
       final isPublish = (todo['isPublish'] == true) ? 'Publish' : 'UnPublish';
       final likeCount = todo['likeCount'] ?? 0;
+      final userNameFuture = ref.read(userRepositoryProvider).getUserName(todoUid);
     
       return FutureBuilder<String>(
-        future: _getUserName(todoUid),
+        future: userNameFuture,
         builder: (context, userSnapshot) {
           final todoUserName = userSnapshot.data ?? "......";
     

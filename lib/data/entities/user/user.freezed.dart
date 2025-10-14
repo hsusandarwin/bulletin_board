@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id;@JsonKey(name: 'displayName') String get name; String get email; String get password; bool get role; String get address; String? get profile;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id;@JsonKey(name: 'displayName') String get name; String get email; String get password; bool get role; String get address; String? get profile;@UserProviderDataConverter() List<UserProviderData>? get providerData;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other.providerData, providerData)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,password,role,address,profile,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,email,password,role,address,profile,const DeepCollectionEquality().hash(providerData),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'User(id: $id, name: $name, email: $email, password: $password, role: $role, address: $address, profile: $profile, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'User(id: $id, name: $name, email: $email, password: $password, role: $role, address: $address, profile: $profile, providerData: $providerData, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -65,7 +65,7 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? password = null,Object? role = null,Object? address = null,Object? profile = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? email = null,Object? password = null,Object? role = null,Object? address = null,Object? profile = freezed,Object? providerData = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,8 @@ as String,password: null == password ? _self.password : password // ignore: cast
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String?,providerData: freezed == providerData ? _self.providerData : providerData // ignore: cast_nullable_to_non_nullable
+as List<UserProviderData>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -161,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -182,10 +183,10 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +203,10 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -217,7 +218,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.
 @JsonSerializable()
 
 class _User implements User {
-  const _User({required this.id, @JsonKey(name: 'displayName') required this.name, required this.email, required this.password, required this.role, required this.address, this.profile, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt});
+  const _User({required this.id, @JsonKey(name: 'displayName') required this.name, required this.email, required this.password, required this.role, required this.address, this.profile, @UserProviderDataConverter() final  List<UserProviderData>? providerData, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _providerData = providerData;
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -227,6 +228,15 @@ class _User implements User {
 @override final  bool role;
 @override final  String address;
 @override final  String? profile;
+ final  List<UserProviderData>? _providerData;
+@override@UserProviderDataConverter() List<UserProviderData>? get providerData {
+  final value = _providerData;
+  if (value == null) return null;
+  if (_providerData is EqualUnmodifiableListView) return _providerData;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(value);
+}
+
 @override@TimestampConverter() final  DateTime createdAt;
 @override@TimestampConverter() final  DateTime updatedAt;
 
@@ -243,16 +253,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.profile, profile) || other.profile == profile)&&const DeepCollectionEquality().equals(other._providerData, _providerData)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,email,password,role,address,profile,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,name,email,password,role,address,profile,const DeepCollectionEquality().hash(_providerData),createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'User(id: $id, name: $name, email: $email, password: $password, role: $role, address: $address, profile: $profile, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'User(id: $id, name: $name, email: $email, password: $password, role: $role, address: $address, profile: $profile, providerData: $providerData, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -263,7 +273,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -280,7 +290,7 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? password = null,Object? role = null,Object? address = null,Object? profile = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? email = null,Object? password = null,Object? role = null,Object? address = null,Object? profile = freezed,Object? providerData = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -289,7 +299,8 @@ as String,password: null == password ? _self.password : password // ignore: cast
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String?,providerData: freezed == providerData ? _self._providerData : providerData // ignore: cast_nullable_to_non_nullable
+as List<UserProviderData>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

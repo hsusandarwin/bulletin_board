@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
+import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
 import 'package:bulletin_board/presentation/storage/provider_setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -27,6 +28,7 @@ abstract class BaseUserRepository {
   Future<void> addUser(User user, String adminEmail, String adminPassword);
   Future<void> signOut();
   Future<void> create(String authUserId);
+  Future<void> updateProvider(User user);
   String get generateNewId;
   Future<auth.UserCredential> signInWithEmailAndPassword({
     required String email,
@@ -35,6 +37,7 @@ abstract class BaseUserRepository {
   Future<String?> uploadProfileImage(File imageFile, String userId);
   Future<void> updateDisplayName(String userId, String name);
   Future<String?> loadProfileImage(String userId);
+  Future<String> getUserName(String uid);
 }
 
 final userRepositoryProvider =
@@ -380,18 +383,36 @@ Future<void> deleteUserByAdmin(
   }
 
   @override
+  Future<String> getUserName(String uid) async {
+    final userDoc = await _userDB.doc(uid).get();
+    if (userDoc.exists && userDoc.data()!.containsKey('displayName')) {
+      return userDoc['displayName'];
+    }
+    return "Unknown";
+  }
+
+  @override
   Future<void> create(String authUserId) async {
   final currentUser = _auth.currentUser;
-  if (currentUser == null) return;
+    if (currentUser == null) return;
+    final userProviderData = UserProviderData(
+      name: currentUser.displayName ?? '',
+      email: currentUser.email!,
+      providerType: currentUser.providerData.first.providerId == 'password'
+          ? 'email/password'
+          : currentUser.providerData.first.providerId,
+      uid: currentUser.providerData.first.uid!,
+    );
 
   final newUser = User(
     id: authUserId,
     name: currentUser.displayName ?? 'New User',
     email: currentUser.email!,
-    password: '',       // optional, Firebase auth handles passwords
-    role: false,        // default role
-    address: '',        // default empty
-    profile: '',        // default empty
+    password: '',      
+    role: false,       
+    address: '',
+    profile: '',
+    providerData: [userProviderData],
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   );
@@ -400,5 +421,33 @@ Future<void> deleteUserByAdmin(
 
   await _userDB.doc(authUserId).set(newUser.toJson());
 }
+
+ @override
+  Future<void> updateProvider(User user) async {
+    final currentUser = _auth.currentUser!;
+    final authProviderType = currentUser.providerData.first.providerId;
+    final providerList = user.providerData ?? [];
+    logger.e(user.providerData);
+
+    final providerExists = providerList.any((provider) =>
+        provider.providerType ==
+        (authProviderType == 'password' ? 'email/password' : authProviderType));
+
+    if (!providerExists) {
+      final newProviderData = UserProviderData(
+          name: currentUser.displayName ?? '',
+          email: currentUser.email!,
+          providerType:
+              authProviderType == 'password' ? 'email/password' : authProviderType,
+          uid: currentUser.providerData.first.uid!,
+          photo: currentUser.photoURL ?? '');
+
+      final updatedUser = user.copyWith(
+        providerData: [...providerList, newProviderData],
+        updatedAt: DateTime.now(),
+      );
+      await _userDB.doc(user.id).set(updatedUser.toJson());
+    }
+  }
 
 }

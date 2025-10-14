@@ -10,6 +10,11 @@ final userNotifierProvider = StateNotifierProvider.autoDispose.family<UserNotifi
     return UserNotifier(user,userRepo);
 },);
 
+final userNameProvider = FutureProvider.family<String, String>((ref, uid) async {
+  final repo = ref.read(userRepositoryProvider);
+  return repo.getUserName(uid);
+});
+
 final userProviderFuture = FutureProvider.family<User?,String>((ref, userId){
   final userRepository = ref.watch(userRepositoryProvider);
   return userRepository.getUserFuture(userId: userId);

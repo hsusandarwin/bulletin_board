@@ -11,9 +11,7 @@ _UserProviderData _$UserProviderDataFromJson(Map<String, dynamic> json) =>
       uid: json['uid'] as String? ?? '',
       email: json['email'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      password: json['password'] as String? ?? '',
-      role: json['role'] as bool? ?? false,
-      address: json['address'] as String? ?? '',
+      providerType: json['providerType'] as String? ?? '',
       photo: json['photo'] as String? ?? '',
     );
 
@@ -22,8 +20,6 @@ Map<String, dynamic> _$UserProviderDataToJson(_UserProviderData instance) =>
       'uid': instance.uid,
       'email': instance.email,
       'name': instance.name,
-      'password': instance.password,
-      'role': instance.role,
-      'address': instance.address,
+      'providerType': instance.providerType,
       'photo': instance.photo,
     };

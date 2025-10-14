@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
+import 'package:bulletin_board/config/app.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/admin_home/admin_home.dart';
@@ -121,30 +122,25 @@ class LoginPageState extends ConsumerState<LoginPage> {
                               final isVerified = firebaseUser?.emailVerified ?? false;
 
                               if (!isVerified) {
-                                Navigator.pushReplacement(
-                                  context,
+                                Navigator.of(context).pushAndRemoveUntil<void>(
                                   MaterialPageRoute(
-                                    builder: (_) => const EmailVerificationPage(),
+                                    builder: (context) => const EmailVerificationPage(),
                                   ),
+                                  (route) => false,
                                 );
 
                                 showSnackBar(
                                   context,
                                   AppLocalizations.of(context)!.verify,
-                                  Colors.green,
+                                  Colors.orange,
                                 );
                               } else {
-                                if (user.role) {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => const AdminHomePage()),
-                                  );
-                                } else {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => const UserHomePage()),
-                                  );
-                                }
+                                Navigator.of(context).pushAndRemoveUntil<void>(
+                                  MaterialPageRoute(
+                                    builder: (context) => const MyApp(),
+                                  ),
+                                  (route) => false,
+                                );
 
                                 showSnackBar(
                                   context,
@@ -162,7 +158,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
                           } catch (e) {
                             if (!isMounted()) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${AppLocalizations.of(context)!.failLogin}: $e')),
+                              SnackBar(
+                                content: Text(
+                                  '${AppLocalizations.of(context)!.failLogin}: $e',
+                                ),
+                              ),
                             );
                           } finally {
                             if (context.mounted) {

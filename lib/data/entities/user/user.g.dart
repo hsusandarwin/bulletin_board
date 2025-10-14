@@ -14,6 +14,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   role: json['role'] as bool,
   address: json['address'] as String,
   profile: json['profile'] as String?,
+  providerData: (json['providerData'] as List<dynamic>?)
+      ?.map(const UserProviderDataConverter().fromJson)
+      .toList(),
   createdAt: const TimestampConverter().fromJson(json['createdAt']),
   updatedAt: const TimestampConverter().fromJson(json['updatedAt']),
 );
@@ -26,6 +29,9 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'role': instance.role,
   'address': instance.address,
   'profile': instance.profile,
+  'providerData': instance.providerData
+      ?.map(const UserProviderDataConverter().toJson)
+      .toList(),
   'createdAt': const TimestampConverter().toJson(instance.createdAt),
   'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
 };
