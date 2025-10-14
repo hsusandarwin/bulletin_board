@@ -32,7 +32,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
 
   late TextEditingController _emailcontroller;
   late TextEditingController _namecontroller;
-  late TextEditingController _pswcontroller;
   late TextEditingController _addresscontroller;
 
   @override
@@ -40,7 +39,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
     super.initState();
     _emailcontroller = TextEditingController(text: widget.userData['email'] ?? '');
     _namecontroller = TextEditingController(text: widget.userData['displayName'] ?? '');
-    _pswcontroller = TextEditingController(text: widget.userData['password'] ?? '');
     _addresscontroller = TextEditingController(text: widget.userData['address'] ?? '');
     role = (widget.userData['role'] == true) ? "Admin" : "User";
   }
@@ -49,7 +47,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
   void dispose() {
     _emailcontroller.dispose();
     _namecontroller.dispose();
-    _pswcontroller.dispose();
     _addresscontroller.dispose();
     super.dispose();
   }
@@ -127,25 +124,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    child: CustomTextField(
-                      controller: _pswcontroller,
-                      label: AppLocalizations.of(context)!.password,
-                      isRequired: false,
-                      maxLength: 26,
-                      obscured: !isPasswordVisible,
-                      validator: (value) => Validators.validatePassword(
-                          value: value,
-                          labelText: AppLocalizations.of(context)!.enterPassword,
-                          context: context),
-                      onTogglePassword: (isVisible) {
-                        setState(() {
-                          isPasswordVisible = !isVisible;
-                        });
-                      },
-                    ),
-                  ),
                   Row(
                     children: [
                       Row(
@@ -198,12 +176,12 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                                 id: widget.userId, 
                                 name: _namecontroller.text.trim(),
                                 email: _emailcontroller.text.trim(),
-                                password: _pswcontroller.text.trim(),
                                 profile: widget.userData['profile'] ?? '',
+                                password: '',
                                 role: role == "Admin",
                                 address: _addresscontroller.text.trim(),
                                 createdAt: widget.userData['createdAt']?.toDate() ?? DateTime.now(),
-                                updatedAt: DateTime.now(),
+                                updatedAt: DateTime.now(), 
                               );
 
                               await userRepository.updateUser(updatedUser);

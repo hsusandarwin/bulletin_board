@@ -6,8 +6,8 @@ part of 'user_provider_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_UserProviderDate _$UserProviderDateFromJson(Map<String, dynamic> json) =>
-    _UserProviderDate(
+_UserProviderData _$UserProviderDataFromJson(Map<String, dynamic> json) =>
+    _UserProviderData(
       uid: json['uid'] as String? ?? '',
       email: json['email'] as String? ?? '',
       name: json['name'] as String? ?? '',
@@ -17,7 +17,7 @@ _UserProviderDate _$UserProviderDateFromJson(Map<String, dynamic> json) =>
       photo: json['photo'] as String? ?? '',
     );
 
-Map<String, dynamic> _$UserProviderDateToJson(_UserProviderDate instance) =>
+Map<String, dynamic> _$UserProviderDataToJson(_UserProviderData instance) =>
     <String, dynamic>{
       'uid': instance.uid,
       'email': instance.email,

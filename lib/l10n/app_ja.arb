@@ -79,5 +79,14 @@
   "resendEmail": "確認メールを再送する",
   "successVerify": "メールの確認が完了しました。",
   "checkVerify": "メール確認状況を確認する",
-  "joined": "参加日 - "
+  "joined": "参加日 - ",
+  "confirmPsw": "パスワードを確認",
+  "passwordNotMatch": "パスワードが一致しません",
+  "oldPsw": "古いパスワード",
+  "enterOldPsw": "古いパスワードを入力してください",
+  "newPsw": "新しいパスワード",
+  "enternewPsw": "新しいパスワードを入力してください",
+  "retypeNewPsw": "新しいパスワードを確認",
+  "enterretypeNewPsw": "新しいパスワードを再入力してください",
+  "changePsw": "パスワードを変更"
 }

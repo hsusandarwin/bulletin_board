@@ -85,11 +85,10 @@ class _UserListPageState extends ConsumerState<UserListPage> {
 
                 final name = (userData['displayName'] ?? '').toString().toLowerCase();
                 final email = (userData['email'] ?? '').toString().toLowerCase();
-                final password = (userData['password'] ?? '').toString().toLowerCase();
                 final address = (userData['address'] ?? '').toString().toLowerCase();
                 final role = (userData['role'] == true ? 'admin' : 'user').toLowerCase();
 
-                final combined = "$name $email $password $address $role";
+                final combined = "$name $email $address $role";
                 return combined.contains(searchQuery.toLowerCase());
               }).toList();
 
@@ -103,7 +102,6 @@ class _UserListPageState extends ConsumerState<UserListPage> {
             
                     final name = userData['displayName'] ?? 'No Name';
                     final email = userData['email'] ?? 'No Email';
-                    final password = '********';
                     final address = userData['address'] ?? 'No Address';
                     final role = (userData['role'] == true) ? 'admin' : 'user';
                     final createdAt = userData['createdAt'];
@@ -138,7 +136,6 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                               Text(insertLineBreaks("${AppLocalizations.of(context)!.name} : $name"),style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
                               Text(insertLineBreaks("${AppLocalizations.of(context)!.email} : $email")),
-                              Text("${AppLocalizations.of(context)!.password} : $password"),
                               Text(insertLineBreaks("${AppLocalizations.of(context)!.address} : $address")),
                               Text("${AppLocalizations.of(context)!.role} : $role",
                                   style: TextStyle(

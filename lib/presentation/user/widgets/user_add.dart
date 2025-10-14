@@ -183,7 +183,7 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                                 role: role == "Admin",
                                 address: _addresscontroller.text.trim(),
                                 createdAt: DateTime.now(),
-                                updatedAt: DateTime.now(),
+                                updatedAt: DateTime.now(), 
                               );
 
                               await userRepository.addUser(newUser, adminEmail, adminPassword);

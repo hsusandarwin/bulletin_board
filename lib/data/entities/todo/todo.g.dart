@@ -14,9 +14,9 @@ _Todo _$TodoFromJson(Map<String, dynamic> json) => _Todo(
   isPublish: json['isPublish'] as bool,
   image: json['image'] as String?,
   likesCount: (json['likesCount'] as num).toInt(),
-  likedByUsers: (json['likedByUsers'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  likedByUsers: const LikedByUserListConverter().fromJson(
+    json['likedByUsers'] as List,
+  ),
   createdAt: const TimestampConverter().fromJson(json['createdAt']),
   updatedAt: const TimestampConverter().fromJson(json['updatedAt']),
 );
@@ -29,7 +29,9 @@ Map<String, dynamic> _$TodoToJson(_Todo instance) => <String, dynamic>{
   'isPublish': instance.isPublish,
   'image': instance.image,
   'likesCount': instance.likesCount,
-  'likedByUsers': instance.likedByUsers,
+  'likedByUsers': const LikedByUserListConverter().toJson(
+    instance.likedByUsers,
+  ),
   'createdAt': const TimestampConverter().toJson(instance.createdAt),
   'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
 };

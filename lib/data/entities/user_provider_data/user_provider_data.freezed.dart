@@ -11,13 +11,6 @@ part of 'user_provider_data.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
-UserProviderData _$UserProviderDataFromJson(
-  Map<String, dynamic> json
-) {
-    return _UserProviderDate.fromJson(
-      json
-    );
-}
 
 /// @nodoc
 mixin _$UserProviderData {
@@ -102,10 +95,10 @@ extension UserProviderDataPatterns on UserProviderData {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProviderDate value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _UserProviderData value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _UserProviderDate() when $default != null:
+case _UserProviderData() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -124,10 +117,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProviderDate value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _UserProviderData value)  $default,){
 final _that = this;
 switch (_that) {
-case _UserProviderDate():
+case _UserProviderData():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -145,10 +138,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProviderDate value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _UserProviderData value)?  $default,){
 final _that = this;
 switch (_that) {
-case _UserProviderDate() when $default != null:
+case _UserProviderData() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -168,7 +161,7 @@ return $default(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String name,  String password,  bool role,  String address,  String photo)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _UserProviderDate() when $default != null:
+case _UserProviderData() when $default != null:
 return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that.address,_that.photo);case _:
   return orElse();
 
@@ -189,7 +182,7 @@ return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that
 
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String name,  String password,  bool role,  String address,  String photo)  $default,) {final _that = this;
 switch (_that) {
-case _UserProviderDate():
+case _UserProviderData():
 return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that.address,_that.photo);case _:
   throw StateError('Unexpected subclass');
 
@@ -209,7 +202,7 @@ return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String name,  String password,  bool role,  String address,  String photo)?  $default,) {final _that = this;
 switch (_that) {
-case _UserProviderDate() when $default != null:
+case _UserProviderData() when $default != null:
 return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that.address,_that.photo);case _:
   return null;
 
@@ -221,9 +214,9 @@ return $default(_that.uid,_that.email,_that.name,_that.password,_that.role,_that
 /// @nodoc
 @JsonSerializable()
 
-class _UserProviderDate implements UserProviderData {
-  const _UserProviderDate({this.uid = '', this.email = '', this.name = '', this.password = '', this.role = false, this.address = '', this.photo = ''});
-  factory _UserProviderDate.fromJson(Map<String, dynamic> json) => _$UserProviderDateFromJson(json);
+class _UserProviderData implements UserProviderData {
+  const _UserProviderData({this.uid = '', this.email = '', this.name = '', this.password = '', this.role = false, this.address = '', this.photo = ''});
+  factory _UserProviderData.fromJson(Map<String, dynamic> json) => _$UserProviderDataFromJson(json);
 
 @override@JsonKey() final  String uid;
 @override@JsonKey() final  String email;
@@ -237,16 +230,16 @@ class _UserProviderDate implements UserProviderData {
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$UserProviderDateCopyWith<_UserProviderDate> get copyWith => __$UserProviderDateCopyWithImpl<_UserProviderDate>(this, _$identity);
+_$UserProviderDataCopyWith<_UserProviderData> get copyWith => __$UserProviderDataCopyWithImpl<_UserProviderData>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$UserProviderDateToJson(this, );
+  return _$UserProviderDataToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProviderDate&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.photo, photo) || other.photo == photo));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProviderData&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.address, address) || other.address == address)&&(identical(other.photo, photo) || other.photo == photo));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,8 +255,8 @@ String toString() {
 }
 
 /// @nodoc
-abstract mixin class _$UserProviderDateCopyWith<$Res> implements $UserProviderDataCopyWith<$Res> {
-  factory _$UserProviderDateCopyWith(_UserProviderDate value, $Res Function(_UserProviderDate) _then) = __$UserProviderDateCopyWithImpl;
+abstract mixin class _$UserProviderDataCopyWith<$Res> implements $UserProviderDataCopyWith<$Res> {
+  factory _$UserProviderDataCopyWith(_UserProviderData value, $Res Function(_UserProviderData) _then) = __$UserProviderDataCopyWithImpl;
 @override @useResult
 $Res call({
  String uid, String email, String name, String password, bool role, String address, String photo
@@ -274,17 +267,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$UserProviderDateCopyWithImpl<$Res>
-    implements _$UserProviderDateCopyWith<$Res> {
-  __$UserProviderDateCopyWithImpl(this._self, this._then);
+class __$UserProviderDataCopyWithImpl<$Res>
+    implements _$UserProviderDataCopyWith<$Res> {
+  __$UserProviderDataCopyWithImpl(this._self, this._then);
 
-  final _UserProviderDate _self;
-  final $Res Function(_UserProviderDate) _then;
+  final _UserProviderData _self;
+  final $Res Function(_UserProviderData) _then;
 
 /// Create a copy of UserProviderData
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? name = null,Object? password = null,Object? role = null,Object? address = null,Object? photo = null,}) {
-  return _then(_UserProviderDate(
+  return _then(_UserProviderData(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable

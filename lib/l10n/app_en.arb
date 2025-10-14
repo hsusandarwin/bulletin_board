@@ -79,5 +79,14 @@
   "resendEmail": "Resend Verification Email",
   "successVerify": "Your email verification is successful.",
   "checkVerify": "Check if Email is Verified",
-  "joined": "Joined - "
+  "joined": "Joined - ",
+  "confirmPsw": "Confirm Password",
+  "passwordNotMatch": "Password dose not match",
+  "oldPsw": "Old Password",
+  "enterOldPsw": "Enter Old Password",
+  "newPsw": "New Password",
+  "enternewPsw": "Enter New Password",
+  "retypeNewPsw": "Retype New Password",
+  "enterretypeNewPsw": "Enter Retype Password",
+  "changePsw": "Change Password"
 }

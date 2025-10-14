@@ -248,4 +248,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get joined => 'Joined - ';
+
+  @override
+  String get confirmPsw => 'Confirm Password';
+
+  @override
+  String get passwordNotMatch => 'Password dose not match';
+
+  @override
+  String get oldPsw => 'Old Password';
+
+  @override
+  String get enterOldPsw => 'Enter Old Password';
+
+  @override
+  String get newPsw => 'New Password';
+
+  @override
+  String get enternewPsw => 'Enter New Password';
+
+  @override
+  String get retypeNewPsw => 'Retype New Password';
+
+  @override
+  String get enterretypeNewPsw => 'Enter Retype Password';
+
+  @override
+  String get changePsw => 'Change Password';
 }

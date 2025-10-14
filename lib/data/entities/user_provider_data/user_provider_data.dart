@@ -4,7 +4,7 @@ part 'user_provider_data.freezed.dart';
 part 'user_provider_data.g.dart';
 
 @freezed
-abstract class UserProviderData with _$UserProviderData{
+abstract class UserProviderData with _$UserProviderData {
   const factory UserProviderData({
     @Default('') String uid,
     @Default('') String email,
@@ -12,8 +12,9 @@ abstract class UserProviderData with _$UserProviderData{
     @Default('') String password,
     @Default(false) bool role,
     @Default('') String address,
-    @Default('') String photo
-  }) = _UserProviderDate;
+    @Default('') String photo,
+  }) = _UserProviderData; 
 
-  factory UserProviderData.fromJson(Map<String, dynamic> json) => _$UserProviderDataFromJson(json);
+  factory UserProviderData.fromJson(Map<String, dynamic> json) =>
+      _$UserProviderDataFromJson(json);
 }

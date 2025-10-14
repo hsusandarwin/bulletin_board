@@ -1,3 +1,5 @@
+import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
+import 'package:bulletin_board/utils/converters/liked_by_user_con.dart';
 import 'package:bulletin_board/utils/converters/timestamp_con.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -5,7 +7,7 @@ part 'todo.freezed.dart';
 part 'todo.g.dart';
 
 @freezed
-abstract class Todo with _$Todo{
+abstract class Todo with _$Todo {
   const factory Todo({
     required String id,
     required String uid,
@@ -14,10 +16,11 @@ abstract class Todo with _$Todo{
     required bool isPublish,
     required String? image,
     required int likesCount,
-    required List<String> likedByUsers,
+    @LikedByUserListConverter() required List<LikedByUser> likedByUsers,
     @TimestampConverter() required DateTime createdAt,
     @TimestampConverter() required DateTime updatedAt,
   }) = _Todo;
+
   factory Todo.fromJson(Map<String, Object?> json) => _$TodoFromJson(json);
 
 }

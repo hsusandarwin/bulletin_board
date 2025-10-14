@@ -1,3 +1,4 @@
+import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/profile/profile.dart';
@@ -317,8 +318,13 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                 builder: (context, userSnapshot) {
                   final todoUserName = userSnapshot.data ?? ".....";
             
-                  final List likedBy = todo['likedByUsers'] ?? [];
-                  final isFavorite = likedBy.contains(currentUser?.uid);
+                  final likedBy = todo['likedByUsers'];
+                  final isFavorite = likedBy.any((u) {
+                    if (u is LikedByUser) return u.uid == currentUser?.uid;
+                    if (u is Map && u['uid'] != null) return u['uid'] == currentUser?.uid;
+                    if (u is String) return u == currentUser?.uid;
+                    return false;
+                  });
 
                   final createdAt = todo['createdAt'];
                   DateTime? createdAtDate;
@@ -328,7 +334,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                   } else if (createdAt is DateTime) {
                     createdAtDate = createdAt;
                   }
-            
+                            
                 return Card(
                   shadowColor: Colors.red,
                   color: Theme.of(context).colorScheme.surface,
@@ -357,18 +363,34 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                               ),
                               TextButton.icon(
                                 onPressed: () async {
-                                  final docRef = FirebaseFirestore.instance
-                                      .collection('todos')
-                                      .doc(todoDoc.id);
+                                  final docRef = FirebaseFirestore.instance.collection('todos').doc(todoDoc.id);
+                                  final docSnap = await docRef.get();
+                                  final data = docSnap.data() as Map<String, dynamic>;
+                                  final List likedBy = List.from(data['likedByUsers'] ?? []);
+                                  final String uid = currentUser!.uid;
+
+                                  bool alreadyLiked = likedBy.any((u) {
+                                    if (u is Map && u['uid'] != null) return u['uid'] == uid;
+                                    if (u is String) return u == uid;
+                                    return false;
+                                  });
                           
-                                  if (isFavorite) {
+                                  if (alreadyLiked) {
+                                    likedBy.removeWhere((u) {
+                                      if (u is Map && u['uid'] != null) return u['uid'] == uid;
+                                      if (u is String) return u == uid;
+                                      return false;
+                                    });
+
                                     await docRef.update({
-                                      'likedByUsers': FieldValue.arrayRemove([currentUser?.uid]),
+                                      'likedByUsers': likedBy,
                                       'likeCount': FieldValue.increment(-1),
                                     });
                                   } else {
+                                    likedBy.add({'uid': uid, 'likedAt': Timestamp.now()});
+
                                     await docRef.update({
-                                      'likedByUsers': FieldValue.arrayUnion([currentUser?.uid]),
+                                      'likedByUsers': likedBy,
                                       'likeCount': FieldValue.increment(1),
                                     });
                                   }

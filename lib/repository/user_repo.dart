@@ -5,6 +5,7 @@ import 'package:bulletin_board/presentation/storage/provider_setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,6 +14,7 @@ abstract class BaseUserRepository {
   auth.User? get getCurrentUser;
   Stream<User?> getUserStream({required String userId});
   Future<User?> getUserFuture({required String userId});
+  Stream<auth.User?> authUserStream();
   Future<void> register(User user);
   Future<auth.User?> signInWithGoogle();
   Future<bool> isEmailRegistered(String email);
@@ -24,6 +26,7 @@ abstract class BaseUserRepository {
   Future<void> deleteFromStorage(String url);
   Future<void> addUser(User user, String adminEmail, String adminPassword);
   Future<void> signOut();
+  Future<void> create(String authUserId);
   String get generateNewId;
   Future<auth.UserCredential> signInWithEmailAndPassword({
     required String email,
@@ -53,16 +56,6 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   String get generateNewId => _userDB.doc().id;
-
-  @override
-  Future<User?> getUserFuture({required String userId}) async {
-    final doc = await _userDB.doc(userId).get();
-    if (doc.exists) {
-      return User.fromJson(doc.data()!);
-    } else {
-      return null;
-    }
-  }
 
   @override
   Stream<User?> getUserStream({required String userId}) {
@@ -115,7 +108,6 @@ class UserRepositoryImpl implements BaseUserRepository {
     throw Exception('Failed to add user: $e');
   }
 }
-
 
 @override
 Future<void> deleteUser(String userId) async {
@@ -373,4 +365,40 @@ Future<void> deleteUserByAdmin(
       return null;
     }
   }
+
+  @override
+  Stream<auth.User?> authUserStream() => _auth.authStateChanges();
+
+  @override
+  Future<User?> getUserFuture({required String userId}) async {
+    final doc = await _userDB.doc(userId).get();
+    if (doc.exists) {
+      return User.fromJson(doc.data()!);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> create(String authUserId) async {
+  final currentUser = _auth.currentUser;
+  if (currentUser == null) return;
+
+  final newUser = User(
+    id: authUserId,
+    name: currentUser.displayName ?? 'New User',
+    email: currentUser.email!,
+    password: '',       // optional, Firebase auth handles passwords
+    role: false,        // default role
+    address: '',        // default empty
+    profile: '',        // default empty
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
+
+  debugPrint('Saving user: ${newUser.toJson()}');
+
+  await _userDB.doc(authUserId).set(newUser.toJson());
+}
+
 }

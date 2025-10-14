@@ -581,6 +581,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Joined - '**
   String get joined;
+
+  /// No description provided for @confirmPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPsw;
+
+  /// No description provided for @passwordNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Password dose not match'**
+  String get passwordNotMatch;
+
+  /// No description provided for @oldPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Password'**
+  String get oldPsw;
+
+  /// No description provided for @enterOldPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Old Password'**
+  String get enterOldPsw;
+
+  /// No description provided for @newPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPsw;
+
+  /// No description provided for @enternewPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter New Password'**
+  String get enternewPsw;
+
+  /// No description provided for @retypeNewPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Retype New Password'**
+  String get retypeNewPsw;
+
+  /// No description provided for @enterretypeNewPsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Retype Password'**
+  String get enterretypeNewPsw;
+
+  /// No description provided for @changePsw.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePsw;
 }
 
 class _AppLocalizationsDelegate

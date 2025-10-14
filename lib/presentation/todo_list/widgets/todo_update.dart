@@ -58,6 +58,12 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
       setState(() => _selectedImage = File(pickedFile.path));
     }
   }
+  
+  void _removeImage() {
+  setState(() {
+    _selectedImage = null;
+  });
+}
 
   Widget _buildImagePreview() {
     if (_selectedImage != null) {
@@ -185,6 +191,13 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                               _pickImage(ImageSource.camera);
                             },
                             child: Text(AppLocalizations.of(context)!.camera),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _removeImage();
+                            },
+                            child: Text(AppLocalizations.of(context)!.delete),
                           ),
                         ],
                       ),

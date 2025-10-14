@@ -248,4 +248,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get joined => '参加日 - ';
+
+  @override
+  String get confirmPsw => 'パスワードを確認';
+
+  @override
+  String get passwordNotMatch => 'パスワードが一致しません';
+
+  @override
+  String get oldPsw => '古いパスワード';
+
+  @override
+  String get enterOldPsw => '古いパスワードを入力してください';
+
+  @override
+  String get newPsw => '新しいパスワード';
+
+  @override
+  String get enternewPsw => '新しいパスワードを入力してください';
+
+  @override
+  String get retypeNewPsw => '新しいパスワードを確認';
+
+  @override
+  String get enterretypeNewPsw => '新しいパスワードを再入力してください';
+
+  @override
+  String get changePsw => 'パスワードを変更';
 }

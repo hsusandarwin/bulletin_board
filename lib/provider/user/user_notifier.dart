@@ -44,7 +44,7 @@ class UserNotifier extends StateNotifier<UserState> {
         role: false,
         address: '',
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        updatedAt: DateTime.now(), 
       );
       await userRepository.saveUserToFirestore(user);
     } else {

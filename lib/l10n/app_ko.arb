@@ -79,5 +79,14 @@
   "resendEmail": "인증 이메일 다시 보내기",
   "successVerify": "이메일 인증이 완료되었습니다.",
   "checkVerify": "이메일 인증 상태 확인",
-  "joined": "가입일 - "
+  "joined": "가입일 - ",
+  "confirmPsw": "비밀번호 확인",
+  "passwordNotMatch": "비밀번호가 일치하지 않습니다",
+  "oldPsw": "이전 비밀번호",
+  "enterOldPsw": "이전 비밀번호를 입력하세요",
+  "newPsw": "새 비밀번호",
+  "enternewPsw": "새 비밀번호를 입력하세요",
+  "retypeNewPsw": "새 비밀번호 확인",
+  "enterretypeNewPsw": "새 비밀번호를 다시 입력하세요",
+  "changePsw": "비밀번호 변경"
 }

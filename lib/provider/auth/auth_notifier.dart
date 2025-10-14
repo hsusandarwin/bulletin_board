@@ -8,13 +8,28 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../config/logger.dart';
 
-final authNotifierProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
-  final repo = ref.watch(userRepositoryProvider);
-  return AuthStateNotifier(repo);
+final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
+  return ref.watch(userRepositoryProvider).authUserStream().asyncMap((
+    user,
+  ) async {
+    logger.e('user --> $user');
+    if (user != null && !user.emailVerified) {
+      logger.e('user mail --> ${user.email}');
+      await user.reload();
+      return auth.FirebaseAuth.instance.currentUser;
+    }
+    return user;
+  });
 });
 
+final authNotifierProvider =
+    StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
+      final repo = ref.watch(userRepositoryProvider);
+      return AuthStateNotifier(repo);
+    });
+
 class AuthStateNotifier extends StateNotifier<AuthState> {
-   AuthStateNotifier(this._userRepository) : super(const AuthState());
+  AuthStateNotifier(this._userRepository) : super(const AuthState());
 
   final BaseUserRepository _userRepository;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -24,92 +39,92 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> register({
-  required String email,
-  required String password,
-  required String name, 
-  required String address,
-  bool? role
-}) async {
-  try {
-    final userToSave = User(
-      id: _userRepository.generateNewId,
-      name: name,
-      email: email,
-      password: password,
-      profile: '',
-      role: role ?? false, 
-      address: address,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(), 
-    );
+    required String email,
+    required String password,
+    required String name,
+    required String address,
+    bool? role,
+  }) async {
+    try {
+      final userToSave = User(
+        id: _userRepository.generateNewId,
+        name: name,
+        email: email,
+        password: password,
+        profile: '',
+        role: role ?? false,
+        address: address,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-    await _userRepository.register(userToSave);
-    state = state.copyWith(
-      user: userToSave,
-      isLoading: false,
-      isSuccess: true,
-      errorMsg: '',
-    );
-  } catch (e) {
-    state = state.copyWith(
-      isLoading: false,
-      isSuccess: false,
-      errorMsg: e.toString(),
-    );
-    rethrow; 
-  }
-}
-
-Future<void> signInWithGoogle() async {
-  state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
-
-  try {
-    final firebaseUser = await _userRepository.signInWithGoogle();
-    if (firebaseUser == null) {
-      throw Exception("Failed to sign in with Google. User is null.");
-    }
-    final email = firebaseUser.email?.trim().toLowerCase();
-    if (email == null || email.isEmpty) {
-      throw Exception("Google account has no email.");
-    }
-    final existingUser = await _userRepository.getUserByEmail(email);
-
-    if (existingUser != null) {
+      await _userRepository.register(userToSave);
       state = state.copyWith(
-        user: existingUser,
+        user: userToSave,
+        isLoading: true,
+        isSuccess: true,
+        errorMsg: '',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        errorMsg: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
+
+    try {
+      final firebaseUser = await _userRepository.signInWithGoogle();
+      if (firebaseUser == null) {
+        throw Exception("Failed to sign in with Google. User is null.");
+      }
+      final email = firebaseUser.email?.trim().toLowerCase();
+      if (email == null || email.isEmpty) {
+        throw Exception("Google account has no email.");
+      }
+      final existingUser = await _userRepository.getUserByEmail(email);
+
+      if (existingUser != null) {
+        state = state.copyWith(
+          user: existingUser,
+          isLoading: false,
+          isSuccess: true,
+        );
+        return;
+      }
+      final userToSave = User(
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName ?? 'Google User',
+        email: email,
+        password: '',
+        profile: firebaseUser.photoURL ?? '',
+        address: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        role: false,
+      );
+
+      await _userRepository.saveUserToFirestore(userToSave);
+
+      state = state.copyWith(
+        user: userToSave,
         isLoading: false,
         isSuccess: true,
       );
-      return;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMsg: e.toString(),
+        isSuccess: false,
+      );
+      rethrow;
     }
-    final userToSave = User(
-      id: firebaseUser.uid,
-      name: firebaseUser.displayName ?? 'Google User',
-      email: email,
-      password: '', 
-      profile: firebaseUser.photoURL ?? '',
-      address: '',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      role: false,
-    );
-
-    await _userRepository.saveUserToFirestore(userToSave);
-
-    state = state.copyWith(
-      user: userToSave,
-      isLoading: false,
-      isSuccess: true,
-    );
-  } catch (e) {
-    state = state.copyWith(
-      isLoading: false,
-      errorMsg: e.toString(),
-      isSuccess: false,
-    );
-    rethrow;
   }
-}
 
   Future<void> loginWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
@@ -119,7 +134,7 @@ Future<void> signInWithGoogle() async {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         state = state.copyWith(isLoading: false);
-        return; 
+        return;
       }
 
       final email = googleUser.email;
@@ -163,7 +178,7 @@ Future<void> signInWithGoogle() async {
     }
   }
 
-   Future<bool> checkEmailVerified() async {
+  Future<bool> checkEmailVerified() async {
     try {
       auth.User? user = _userRepository.getCurrentUser;
       await user?.reload();
@@ -237,4 +252,20 @@ Future<void> signInWithGoogle() async {
     }
   }
 
+  Future<void> getUserFuture({required String authUserId}) async {
+    // Try to fetch the user from Firestore
+    final user = await _userRepository.getUserFuture(userId: authUserId);
+    if (user == null) {
+      // Create the user if it doesn't exist
+      await _userRepository.create(authUserId);
+
+      // Fetch the newly created user
+      final newUser = await _userRepository.getUserFuture(userId: authUserId);
+      state = state.copyWith(user: newUser);
+    } else {
+      // Update any necessary provider data
+      // await _userRepository.updateUser(user);
+      state = state.copyWith(user: user);
+    }
+  }
 }

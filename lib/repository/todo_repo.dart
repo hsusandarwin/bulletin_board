@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'dart:math' as logger;
+import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:rxdart/rxdart.dart';
 
 
 final todoRepositoryProvider = Provider<TodoRepositoryImpl>(
@@ -82,26 +83,50 @@ class TodoRepositoryImpl implements BaseTodoRepository {
   }
 
 
- @override
-  Stream<List<Todo?>> getRecentLikePostList() {
-    try {
-      final user = auth.FirebaseAuth.instance.currentUser;
-      final snapshotData = _todoDB 
-          .where('likedByUsers', arrayContains: user!.uid)
-          .limit(5) 
-          .snapshots();
+@override
+Stream<List<Todo>> getRecentLikePostList() {
+  return auth.FirebaseAuth.instance.authStateChanges().switchMap((user) {
+    if (user == null) return Stream.value([]);
 
-      return snapshotData.map((snapshot) {
-        return snapshot.docs.map((doc) {
-          final data = doc.data();
-          return Todo.fromJson(data);
-        }).toList();
+    return FirebaseFirestore.instance
+        .collection('todos')
+        .orderBy('createdAt', descending: true)
+        .limit(100)
+        .snapshots()
+        .map((snapshot) {
+      final todos = snapshot.docs.map((doc) {
+        final raw = doc.data();
+        final safeData = {
+          ...raw,
+          'id': doc.id,
+          'likesCount': raw['likesCount'] ?? 0,
+          'likedByUsers': raw['likedByUsers'] ?? <dynamic>[],
+          'createdAt': raw['createdAt'] ?? Timestamp.now(),
+          'updatedAt': raw['updatedAt'] ?? Timestamp.now(),
+        };
+        return Todo.fromJson(safeData);
+      }).toList();
+      final likedByUser = todos.where((todo) {
+        return todo.likedByUsers.any((like) => like.uid == user.uid);
+      }).toList();
+
+      likedByUser.sort((a, b) {
+        final aLike = a.likedByUsers.firstWhere(
+          (like) => like.uid == user.uid,
+          orElse: () => LikedByUser(uid: user.uid, likedAt: DateTime(0)),
+        );
+        final bLike = b.likedByUsers.firstWhere(
+          (like) => like.uid == user.uid,
+          orElse: () => LikedByUser(uid: user.uid, likedAt: DateTime(0)),
+        );
+        return bLike.likedAt.compareTo(aLike.likedAt);
       });
-    } on Exception catch (e) {
-      logger.e;
-      return Stream.error('$e');
-    }
-  }
+
+      return likedByUser.take(5).toList();
+    });
+  });
+}
+
 
   @override
   Future<void> deleteTodoListByUser(String uid) async {

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Todo {
 
- String get id; String get uid; String get title; String get description; bool get isPublish; String? get image; int get likesCount; List<String> get likedByUsers;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id; String get uid; String get title; String get description; bool get isPublish; String? get image; int get likesCount;@LikedByUserListConverter() List<LikedByUser> get likedByUsers;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
 /// Create a copy of Todo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $TodoCopyWith<$Res>  {
   factory $TodoCopyWith(Todo value, $Res Function(Todo) _then) = _$TodoCopyWithImpl;
 @useResult
 $Res call({
- String id, String uid, String title, String description, bool isPublish, String? image, int likesCount, List<String> likedByUsers,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String uid, String title, String description, bool isPublish, String? image, int likesCount,@LikedByUserListConverter() List<LikedByUser> likedByUsers,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -75,7 +75,7 @@ as String,isPublish: null == isPublish ? _self.isPublish : isPublish // ignore: 
 as bool,image: freezed == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
 as String?,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
 as int,likedByUsers: null == likedByUsers ? _self.likedByUsers : likedByUsers // ignore: cast_nullable_to_non_nullable
-as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as List<LikedByUser>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount,  List<String> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount, @LikedByUserListConverter()  List<LikedByUser> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Todo() when $default != null:
 return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish,_that.image,_that.likesCount,_that.likedByUsers,_that.createdAt,_that.updatedAt);case _:
@@ -183,7 +183,7 @@ return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount,  List<String> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount, @LikedByUserListConverter()  List<LikedByUser> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Todo():
 return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish,_that.image,_that.likesCount,_that.likedByUsers,_that.createdAt,_that.updatedAt);case _:
@@ -203,7 +203,7 @@ return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount,  List<String> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String uid,  String title,  String description,  bool isPublish,  String? image,  int likesCount, @LikedByUserListConverter()  List<LikedByUser> likedByUsers, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Todo() when $default != null:
 return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish,_that.image,_that.likesCount,_that.likedByUsers,_that.createdAt,_that.updatedAt);case _:
@@ -218,7 +218,7 @@ return $default(_that.id,_that.uid,_that.title,_that.description,_that.isPublish
 @JsonSerializable()
 
 class _Todo implements Todo {
-  const _Todo({required this.id, required this.uid, required this.title, required this.description, required this.isPublish, required this.image, required this.likesCount, required final  List<String> likedByUsers, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _likedByUsers = likedByUsers;
+  const _Todo({required this.id, required this.uid, required this.title, required this.description, required this.isPublish, required this.image, required this.likesCount, @LikedByUserListConverter() required final  List<LikedByUser> likedByUsers, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _likedByUsers = likedByUsers;
   factory _Todo.fromJson(Map<String, dynamic> json) => _$TodoFromJson(json);
 
 @override final  String id;
@@ -228,8 +228,8 @@ class _Todo implements Todo {
 @override final  bool isPublish;
 @override final  String? image;
 @override final  int likesCount;
- final  List<String> _likedByUsers;
-@override List<String> get likedByUsers {
+ final  List<LikedByUser> _likedByUsers;
+@override@LikedByUserListConverter() List<LikedByUser> get likedByUsers {
   if (_likedByUsers is EqualUnmodifiableListView) return _likedByUsers;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_likedByUsers);
@@ -271,7 +271,7 @@ abstract mixin class _$TodoCopyWith<$Res> implements $TodoCopyWith<$Res> {
   factory _$TodoCopyWith(_Todo value, $Res Function(_Todo) _then) = __$TodoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String uid, String title, String description, bool isPublish, String? image, int likesCount, List<String> likedByUsers,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String uid, String title, String description, bool isPublish, String? image, int likesCount,@LikedByUserListConverter() List<LikedByUser> likedByUsers,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -298,7 +298,7 @@ as String,isPublish: null == isPublish ? _self.isPublish : isPublish // ignore: 
 as bool,image: freezed == image ? _self.image : image // ignore: cast_nullable_to_non_nullable
 as String?,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
 as int,likedByUsers: null == likedByUsers ? _self._likedByUsers : likedByUsers // ignore: cast_nullable_to_non_nullable
-as List<String>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as List<LikedByUser>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

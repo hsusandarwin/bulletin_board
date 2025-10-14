@@ -1,3 +1,4 @@
+import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/todo_list/widgets/todo_update.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
@@ -32,16 +33,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
-    final todosStream = FirebaseFirestore.instance
+      final todosStream = FirebaseFirestore.instance
       .collection('todos')
       .where('uid', isEqualTo: currentUser?.uid)
       .orderBy('createdAt',descending: true)
       .snapshots();
 
-    final likedStream = FirebaseFirestore.instance
-      .collection('todos')
-      .where('likedByUsers', arrayContains: currentUser?.uid)
-      .snapshots();
+      final likedPostsAsync = ref.watch(getRecentLikesProvider);
               
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +59,82 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
               Expanded(
                 flex: 1,
-                child: recentLikes(likedStream)),
+                child: likedPostsAsync.when(
+                  data: (likedPosts) {
+                    if (likedPosts.isEmpty) {
+                      return const Center(child: Text("No liked posts yet."));
+                    }
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: likedPosts.length,
+                      itemBuilder: (context, index) {
+                        final todo = likedPosts[index];
+                        final imageUrl = todo.image ?? '';
+                        final title = todo.title.isNotEmpty ? todo.title : '(No title)';
+                        final description = todo.description.isNotEmpty
+                            ? todo.description
+                            : '(No description)';
+
+                        return Container(
+                          width: 120,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                                  child: imageUrl.isNotEmpty
+                                      ? Image.network(
+                                          imageUrl,
+                                          width: double.infinity,
+                                          height: 70,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.broken_image, size: 24, color: Colors.grey),
+                                        )
+                                      : Container(
+                                          color: Colors.grey[200],
+                                          width: double.infinity,
+                                          height: 70,
+                                          child: const Center(
+                                            child: Icon(Icons.image, size: 24, color: Colors.grey),
+                                          ),
+                                        ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Text(
+                                    title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                  child: Text(
+                                    description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }, 
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text('Error: $error')),
+                ),
+              ),
               SizedBox(height: 15,),
               Text(AppLocalizations.of(context)!.yourPosts,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
               Expanded(
@@ -86,83 +159,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         backgroundColor: Colors.grey,
         child: const Icon(Icons.add, size: 28,color: Colors.white,),
       ),
-    );
-  }
-
-  StreamBuilder<QuerySnapshot<Object?>> recentLikes(Stream<QuerySnapshot<Map<String, dynamic>>> likedStream) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: likedStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("No liked posts yet."));
-        }
-
-        final likedPosts = snapshot.data!.docs;
-
-        return ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: likedPosts.length,
-          itemBuilder: (context, index) {
-            final todo = likedPosts[index].data() as Map<String, dynamic>;
-            return Container(
-              width: 100,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Column(
-              
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      child: todo['image'] != null && todo['image'].toString().isNotEmpty
-                          ? Image.network(
-                              todo['image'],
-                              width: double.infinity,
-                              height: 70,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image, size: 20, color: Colors.grey),
-                            )
-                          : Container(
-                              color: Colors.grey[200],
-                              width: double.infinity,
-                              height: 70,
-                              child: const Center(
-                                child: Icon(Icons.image, size: 20, color: Colors.grey),
-                              ),
-                            ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Text(
-                        todo['title'] ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Text(
-                        todo['description'] ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
@@ -195,8 +191,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         builder: (context, userSnapshot) {
           final todoUserName = userSnapshot.data ?? "......";
     
-          final List likedBy = todo['likedByUsers'] ?? [];
-          final isFavorite = likedBy.contains(currentUser?.uid);
+          final likedBy = todo['likedByUsers'];
+          final isFavorite = likedBy.any((u) {
+            if (u is LikedByUser) return u.uid == currentUser?.uid;
+            if (u is Map && u['uid'] != null) return u['uid'] == currentUser?.uid;
+            if (u is String) return u == currentUser?.uid;
+            return false;
+          });
 
           final createdAt = todo['createdAt'];
                   DateTime? createdAtDate;
@@ -235,18 +236,34 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                       TextButton.icon(
                         onPressed: () async {
-                          final docRef = FirebaseFirestore.instance
-                              .collection('todos')
-                              .doc(todoDoc.id);
+                          final docRef = FirebaseFirestore.instance.collection('todos').doc(todoDoc.id);
+                          final docSnap = await docRef.get();
+                          final data = docSnap.data() as Map<String, dynamic>;
+                          final List likedBy = List.from(data['likedByUsers'] ?? []);
+                          final String uid = currentUser!.uid;
+
+                          bool alreadyLiked = likedBy.any((u) {
+                            if (u is Map && u['uid'] != null) return u['uid'] == uid;
+                            if (u is String) return u == uid;
+                            return false;
+                          });
                   
-                          if (isFavorite) {
+                          if (alreadyLiked) {
+                            likedBy.removeWhere((u) {
+                              if (u is Map && u['uid'] != null) return u['uid'] == uid;
+                              if (u is String) return u == uid;
+                              return false;
+                            });
+
                             await docRef.update({
-                              'likedByUsers': FieldValue.arrayRemove([currentUser?.uid]),
+                              'likedByUsers': likedBy,
                               'likeCount': FieldValue.increment(-1),
                             });
                           } else {
+                            likedBy.add({'uid': uid, 'likedAt': Timestamp.now()});
+
                             await docRef.update({
-                              'likedByUsers': FieldValue.arrayUnion([currentUser?.uid]),
+                              'likedByUsers': likedBy,
                               'likeCount': FieldValue.increment(1),
                             });
                           }

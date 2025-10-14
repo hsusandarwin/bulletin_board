@@ -249,4 +249,31 @@ class AppLocalizationsMy extends AppLocalizations {
 
   @override
   String get joined => 'ပါဝင်သည့်ရက်စွဲ - ';
+
+  @override
+  String get confirmPsw => 'စကားဝှက်အတည်ပြုပါ';
+
+  @override
+  String get passwordNotMatch => 'စကားဝှက်တူညီခြင်းမရှိပါ';
+
+  @override
+  String get oldPsw => 'စကားဝှက်အဟောင်း';
+
+  @override
+  String get enterOldPsw => 'စကားဝှက်အဟောင်းကို ဖြည့်ပါ';
+
+  @override
+  String get newPsw => 'စကားဝှက်အသစ်';
+
+  @override
+  String get enternewPsw => 'စကားဝှက်အသစ်ကို ဖြည့်ပါ';
+
+  @override
+  String get retypeNewPsw => 'စကားဝှက်အသစ်ကို ထပ်မံရိုက်ပါ';
+
+  @override
+  String get enterretypeNewPsw => 'စကားဝှက်အသစ်ကို ထပ်မံဖြည့်ပါ';
+
+  @override
+  String get changePsw => 'စကားဝှက်ပြောင်းပါ';
 }

@@ -248,4 +248,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get joined => '가입일 - ';
+
+  @override
+  String get confirmPsw => '비밀번호 확인';
+
+  @override
+  String get passwordNotMatch => '비밀번호가 일치하지 않습니다';
+
+  @override
+  String get oldPsw => '이전 비밀번호';
+
+  @override
+  String get enterOldPsw => '이전 비밀번호를 입력하세요';
+
+  @override
+  String get newPsw => '새 비밀번호';
+
+  @override
+  String get enternewPsw => '새 비밀번호를 입력하세요';
+
+  @override
+  String get retypeNewPsw => '새 비밀번호 확인';
+
+  @override
+  String get enterretypeNewPsw => '새 비밀번호를 다시 입력하세요';
+
+  @override
+  String get changePsw => '비밀번호 변경';
 }

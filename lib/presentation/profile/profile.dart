@@ -5,6 +5,9 @@ import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
+import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
+import 'package:bulletin_board/provider/auth/auth_notifier.dart';
+import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -122,38 +125,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
+        title: Text(AppLocalizations.of(context)!.changePsw),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
               CustomTextField(
                 controller: oldPasswordController,
-                label: 'Password',
+                label: AppLocalizations.of(context)!.oldPsw,
                 isRequired: true,
                 maxLength: 26,
                 validator: (value) => Validators.validatePassword(
                     value: value,
-                labelText: 'Enter Old Password...',
+                labelText: AppLocalizations.of(context)!.enterOldPsw,
                 context: context),
               ),
               CustomTextField(
                 controller: newPasswordController,
-                label: 'Password',
+                label: AppLocalizations.of(context)!.newPsw,
                 isRequired: true,
                 maxLength: 26,
                 validator: (value) => Validators.validatePassword(
                     value: value,
-                labelText: 'Enter New Password...',
+                labelText: AppLocalizations.of(context)!.enternewPsw,
                 context: context),
               ),
               CustomTextField(
                 controller: confirmPasswordController,
-                label: 'Password',
+                label: AppLocalizations.of(context)!.retypeNewPsw,
                 isRequired: true,
                 maxLength: 26,
                 validator: (value) => Validators.validatePassword(
                     value: value,
-                labelText: 'Enter Confirm New Password...',
+                labelText: AppLocalizations.of(context)!.enterretypeNewPsw,
                 context: context),
               ),
           ],
@@ -161,7 +164,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -170,7 +173,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               final confirmPassword = confirmPasswordController.text.trim();
 
               if (newPassword != confirmPassword) {
-                showSnackBar(context, 'New Password and Confirm Password do not match', Colors.red);
+                showSnackBar(context, AppLocalizations.of(context)!.passwordNotMatch, Colors.red);
                 return;
               }
 
@@ -193,12 +196,34 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 showSnackBar(context, 'Error:  $e', Colors.red);
               }
             },
-            child: const Text('Update'),
+            child: Text(AppLocalizations.of(context)!.update),
           ),
         ],
       ),
     );
   }
+
+  Future<void> logOut() async {
+    ref.read(loadingProvider.notifier).state = true;
+        try {
+          final authNotifier = ref.watch(authNotifierProvider.notifier);
+          await authNotifier.signOut();
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
+          }
+      }finally {
+        if (context.mounted) {
+          ref.read(loadingProvider.notifier).state = false;
+        }
+      }
+    }
   
 
   Widget _buildEditableRow({
@@ -255,154 +280,153 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.profile,textAlign: TextAlign.start,style: TextStyle(fontSize: 20),),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Stack(
-              children: [
-                _uploadedImageUrl != null
-                    ? CircleAvatar(
-                        radius: 64,
-                        backgroundImage: File(_uploadedImageUrl!).existsSync()
-                            ? FileImage(File(_uploadedImageUrl!))
-                            : null,
-                        backgroundColor: Colors.grey[300],
-                      )
-                    : const CircleAvatar(
-                        radius: 64,
-                        backgroundColor: Colors.grey,
-                        child: Icon(Icons.person, size: 60, color: Colors.white),
-                      ),
-                Positioned(
-                  bottom: 0,
-                  right: -10,
-                  child: IconButton(
-                    icon: const Icon(Icons.camera_alt, size: 30),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(AppLocalizations.of(context)!.selectImageSource),
-                          actions: [
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _pickImage(ImageSource.gallery);
-                                },
-                                child: Text(AppLocalizations.of(context)!.gallery)),
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _pickImage(ImageSource.camera);
-                                },
-                                child: Text(AppLocalizations.of(context)!.camera)),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildEditableRow(
-              icon: Icons.person,
-              value: _nameController.text,
-              isEditing: _isEditingName,
-              controller: _nameController,
-              onSave: _updateDisplayName,
-              onCancel: () {
-                setState(() {
-                  _isEditingName = false;
-                  _nameController.text = _currentUser.displayName ?? '';
-                });
-              },
-              onEdit: () => setState(() => _isEditingName = true),
-            ),
-            const SizedBox(height: 20),
-            _buildEditableRow(
-              icon: Icons.email,
-              value: _emailController.text,
-              isEditing: _isEditingEmail,
-              controller: _emailController,
-              onSave: _updateEmail,
-              onCancel: () {
-                setState(() {
-                  _isEditingEmail = false;
-                  _emailController.text = _currentUser.email ?? '';
-                });
-              },
-              onEdit: () => setState(() => _isEditingEmail = true),
-            ),
-            const SizedBox(height: 20),
-            _buildEditableRow(
-              icon: Icons.home,
-              value: _addressController.text,
-              isEditing: _isEditingAddress,
-              controller: _addressController,
-              onSave: _updateAddress,
-              onCancel: () {
-                setState(() {
-                  _isEditingAddress = false;
-                });
-              },
-              onEdit: () => setState(() => _isEditingAddress = true),
-            ),
-            const SizedBox(height: 20),
-            _buildEditableRow(
-              icon: Icons.lock,
-              value: '********',
-              isEditing: false,
-              controller: TextEditingController(),
-              onSave: () {},
-              onCancel: () {},
-              onEdit: () {},
-              isPassword: true,
-              onPasswordEdit: _changePasswordDialog,
-            ),
-            const SizedBox(height: 40),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return LoadingOverlay(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.profile,textAlign: TextAlign.start,style: TextStyle(fontSize: 20),),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              Stack(
                 children: [
-                  Text(AppLocalizations.of(context)!.joined,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  SizedBox(width: 3),
-                  Icon(Icons.calendar_today),
-                  Text(
-                    DateFormat('dd/MM/yyyy')
-                        .format(_currentUser.metadata.creationTime!),
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  _uploadedImageUrl != null
+                      ? CircleAvatar(
+                          radius: 64,
+                          backgroundImage: File(_uploadedImageUrl!).existsSync()
+                              ? FileImage(File(_uploadedImageUrl!))
+                              : null,
+                          backgroundColor: Colors.grey[300],
+                        )
+                      : const CircleAvatar(
+                          radius: 64,
+                          backgroundColor: Colors.grey,
+                          child: Icon(Icons.person, size: 60, color: Colors.white),
+                        ),
+                  Positioned(
+                    bottom: 0,
+                    right: -10,
+                    child: IconButton(
+                      icon: const Icon(Icons.camera_alt, size: 30),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(AppLocalizations.of(context)!.selectImageSource),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _pickImage(ImageSource.gallery);
+                                  },
+                                  child: Text(AppLocalizations.of(context)!.gallery)),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _pickImage(ImageSource.camera);
+                                  },
+                                  child: Text(AppLocalizations.of(context)!.camera)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 40),
-            TextButton.icon(
-                  onPressed: () {
-                  showConfirmationDialog(
-                    context: context,
-                    title: AppLocalizations.of(context)!.confirmLogout,
-                    confirmText: AppLocalizations.of(context)!.logout,
-                    confirmIcon: Icons.logout,
-                    confirmColor: Colors.red,
-                    onConfirm: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                      );
-                    },
-                  );
+              const SizedBox(height: 20),
+              _buildEditableRow(
+                icon: Icons.person,
+                value: _nameController.text,
+                isEditing: _isEditingName,
+                controller: _nameController,
+                onSave: _updateDisplayName,
+                onCancel: () {
+                  setState(() {
+                    _isEditingName = false;
+                    _nameController.text = _currentUser.displayName ?? '';
+                  });
                 },
-                  icon: const Icon(Icons.logout_rounded,color: Colors.red,), 
-                  label: Text(AppLocalizations.of(context)!.logout,style: TextStyle(color: Colors.red,fontSize: 18),),
+                onEdit: () => setState(() => _isEditingName = true),
+              ),
+              const SizedBox(height: 20),
+              _buildEditableRow(
+                icon: Icons.email,
+                value: _emailController.text,
+                isEditing: _isEditingEmail,
+                controller: _emailController,
+                onSave: _updateEmail,
+                onCancel: () {
+                  setState(() {
+                    _isEditingEmail = false;
+                    _emailController.text = _currentUser.email ?? '';
+                  });
+                },
+                onEdit: () => setState(() => _isEditingEmail = true),
+              ),
+              const SizedBox(height: 20),
+              _buildEditableRow(
+                icon: Icons.home,
+                value: _addressController.text,
+                isEditing: _isEditingAddress,
+                controller: _addressController,
+                onSave: _updateAddress,
+                onCancel: () {
+                  setState(() {
+                    _isEditingAddress = false;
+                  });
+                },
+                onEdit: () => setState(() => _isEditingAddress = true),
+              ),
+              const SizedBox(height: 20),
+              _buildEditableRow(
+                icon: Icons.lock,
+                value: '********',
+                isEditing: false,
+                controller: TextEditingController(),
+                onSave: () {},
+                onCancel: () {},
+                onEdit: () {},
+                isPassword: true,
+                onPasswordEdit: _changePasswordDialog,
+              ),
+              const SizedBox(height: 40),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(AppLocalizations.of(context)!.joined,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    SizedBox(width: 3),
+                    Icon(Icons.calendar_today),
+                    Text(
+                      DateFormat('dd/MM/yyyy')
+                          .format(_currentUser.metadata.creationTime!),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
-          ],
+              ),
+              const SizedBox(height: 40),
+              TextButton.icon(
+                    onPressed: () {
+                    showConfirmationDialog(
+                      context: context,
+                      title: AppLocalizations.of(context)!.confirmLogout,
+                      confirmText: AppLocalizations.of(context)!.logout,
+                      confirmIcon: Icons.logout,
+                      confirmColor: Colors.red,
+                      onConfirm: () {
+                        logOut();
+                      },
+                    );
+                  },
+                    icon: const Icon(Icons.logout_rounded,color: Colors.red,), 
+                    label: Text(AppLocalizations.of(context)!.logout,style: TextStyle(color: Colors.red,fontSize: 18),),
+                  ),
+            ],
+          ),
         ),
       ),
     );

@@ -9,13 +9,17 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+final todoRepositoryProvider = Provider<TodoRepositoryImpl>((ref) {
+  return TodoRepositoryImpl();
+});
+
 final todoNotifierProvider = StateNotifierProvider<TodoNotifier, List<Todo>>(
   (ref) => TodoNotifier(ref),
 );
 
-final getRecentLikesProvider = StreamProvider<List<Todo?>>((ref) {
-  final todoRepository = ref.watch(todoRepositoryProvider);
-  return todoRepository.getRecentLikePostList();
+final getRecentLikesProvider = StreamProvider<List<Todo>>((ref) {
+  final repo = ref.watch(todoRepositoryProvider);
+  return repo.getRecentLikePostList();
 });
 
 class TodoNotifier extends StateNotifier<List<Todo>> {
