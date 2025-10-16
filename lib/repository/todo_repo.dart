@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -123,6 +124,7 @@ class TodoRepositoryImpl implements BaseTodoRepository {
         ),
       );
       imageUrl = response.secureUrl;
+      logger.f('image --> $imageUrl');
     }
 
     final updatedData = {
@@ -130,9 +132,10 @@ class TodoRepositoryImpl implements BaseTodoRepository {
       'description': description,
       'isPublish': isPublish,
       'uid': uid,
-      if (imageUrl != null) 'image': imageUrl,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'image': imageUrl,
+      'updatedAt': DateTime.now(),
     };
+    logger.f('update todo --> $updatedData');
 
     await _todoDB.doc(id).update(updatedData);
 

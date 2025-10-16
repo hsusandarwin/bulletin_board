@@ -138,6 +138,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       }
 
       final googleAuth = await googleUser.authentication;
+      await CurrentProviderSetting().update(providerId: 'google.com');
 
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -255,7 +256,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           password: password,
         );
         await currentUser.reauthenticateWithCredential(credential);
-      } else if (providerId.contains('google')) {
+      } else if (providerId.contains('google.com')) {
         final googleProvider = auth.GoogleAuthProvider();
         await currentUser.reauthenticateWithProvider(googleProvider);
       }

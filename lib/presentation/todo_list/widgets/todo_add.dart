@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
-import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -39,7 +38,6 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(loadingProvider);
 
     return LoadingOverlay(
       child: Scaffold(
@@ -167,9 +165,7 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                         ),
-                        onPressed: isLoading
-                            ? null
-                            : () async {
+                        onPressed: () async {
                                 if (formKey.currentState!.validate()) {
                                   final currentUser =
                                       auth.FirebaseAuth.instance.currentUser;

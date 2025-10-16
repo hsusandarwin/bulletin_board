@@ -21,4 +21,9 @@ class CurrentProviderSetting {
     final box = GetStorage();
     await box.write(_providerIdKey, providerId);
   }
+
+  Future<void> clear() async {
+    final box = GetStorage();
+    await box.remove(_providerIdKey);
+  }
 }

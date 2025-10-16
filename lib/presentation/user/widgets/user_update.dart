@@ -174,7 +174,7 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                         ),
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            ref.read(loadingProvider.notifier).state = true;
+                            ref.read(loadingProvider.notifier).update((state) => true);
 
                             try {
                               final updatedUser = User(
@@ -207,8 +207,7 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                               }
                             } finally {
                               if (context.mounted) {
-                                ref.read(loadingProvider.notifier).state =
-                                    false;
+                                ref.read(loadingProvider.notifier).update((state) => false);
                               }
                             }
                           }

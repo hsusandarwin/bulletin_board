@@ -153,11 +153,9 @@ class SettingPage extends HookConsumerWidget {
               Divider(color: Colors.grey, thickness: 1, height: 20),
               TextButton.icon(
                 onPressed: () async {
-                  // ignore: dead_code, unnecessary_null_comparison
-                  if (_currentUser == null) return;
                   final providerId = await CurrentProviderSetting().get() ?? '';
+                  logger.f('provider --> $providerId');
                   final provider = providerId;
-                  logger.f('provider -->$provider');
                   final isPassword = provider == 'password';
 
                   await accountDeleteConfirmationDialog(

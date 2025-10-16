@@ -5,7 +5,6 @@ import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
-import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -57,11 +56,11 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
     }
   }
 
-  void _removeImage() {
-    setState(() {
-      _selectedImage = null;
-    });
-  }
+  // void _removeImage() {
+  //   setState(() {
+  //     _selectedImage = null;
+  //   });
+  // }
 
   Widget _buildImagePreview() {
     if (_selectedImage != null) {
@@ -96,7 +95,6 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(loadingProvider);
 
     return LoadingOverlay(
       child: Scaffold(
@@ -200,13 +198,13 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                               },
                               child: Text(AppLocalizations.of(context)!.camera),
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                _removeImage();
-                              },
-                              child: Text(AppLocalizations.of(context)!.delete),
-                            ),
+                            // TextButton(
+                            //   onPressed: () {
+                            //     Navigator.pop(context);
+                            //     _removeImage();
+                            //   },
+                            //   child: Text(AppLocalizations.of(context)!.delete),
+                            // ),
                           ],
                         ),
                       );
@@ -228,9 +226,7 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                         ),
-                        onPressed: isLoading
-                            ? null
-                            : () async {
+                        onPressed: () async {
                                 if (formKey.currentState!.validate()) {
                                   final currentUser =
                                       auth.FirebaseAuth.instance.currentUser;
@@ -245,7 +241,7 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                                         isPublish: isPublishBool,
                                         uid: currentUser?.uid ?? "unknown",
                                         imageFile: _selectedImage,
-                                        context: context,
+                                        context: context
                                       );
                                 }
                               },

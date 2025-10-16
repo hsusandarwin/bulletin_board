@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
@@ -40,7 +41,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
 
   TodoNotifier(this.ref) : _repo = ref.read(todoRepositoryProvider), super([]);
 
-  Future<void> toggleLike(String todoId, String currentUid) async {
+   Future<void> toggleLike(String todoId, String currentUid) async {
     await _repo.toggleLike(todoId: todoId, currentUid: currentUid);
   }
 
@@ -88,7 +89,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
     File? imageFile,
     required BuildContext context,
   }) async {
-    ref.read(loadingProvider.notifier).state = true;
+    ref.read(loadingProvider.notifier).update((state) => true);
     try {
       final updatedTodo = await _repo.updateTodo(
         id: id,
@@ -98,6 +99,8 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
         uid: uid,
         imageFile: imageFile,
       );
+
+      logger.f('update todo --> $updatedTodo');
 
       state = [
         for (final todo in state)
@@ -121,7 +124,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
         );
       }
     } finally {
-      ref.read(loadingProvider.notifier).state = false;
+      ref.read(loadingProvider.notifier).update((state) => false);
     }
   }
 
@@ -131,7 +134,6 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
   }
 
   Future<void> deleteTodoByUser(String uid) async {
-    ref.read(loadingProvider.notifier).state = true;
     try {
       await _repo.deleteTodoListByUser(uid);
       state = state.where((todo) => todo.uid != uid).toList();

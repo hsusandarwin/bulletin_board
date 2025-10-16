@@ -9,6 +9,7 @@ import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -208,6 +209,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     try {
       final authNotifier = ref.watch(authNotifierProvider.notifier);
       await authNotifier.signOut();
+      await CurrentProviderSetting().clear();
       if (context.mounted) {
         Navigator.pushReplacement(
           context,
