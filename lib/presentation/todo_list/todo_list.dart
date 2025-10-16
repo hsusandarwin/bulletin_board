@@ -47,7 +47,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
     );
 
     final topPosts = List<Todo>.from(todosStream)
-    ..sort((a, b) => b.likesCount.compareTo(a.likesCount));
+      ..sort((a, b) => b.likesCount.compareTo(a.likesCount));
     final topFive = topPosts.take(5).toList();
 
     final currentUid = FirebaseAuth.instance.currentUser!.uid;
@@ -80,18 +80,16 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
             padding: const EdgeInsets.only(right: 10.0),
             child: Row(
               children: [
-                  TextButton.icon(
-                    onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ProfilePage(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.person),
-                      label: Text(currentUser?.displayName ?? 'User'),
-                    ),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfilePage()),
+                    );
+                  },
+                  icon: const Icon(Icons.person),
+                  label: Text(currentUser?.displayName ?? 'User'),
+                ),
                 IconButton(
                   onPressed: () {
                     showConfirmationDialog(
@@ -318,7 +316,9 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                         ),
                         Consumer(
                           builder: (context, ref, _) {
-                            final todoAsync = ref.watch(todoByIdProvider(todo.id));
+                            final todoAsync = ref.watch(
+                              todoByIdProvider(todo.id),
+                            );
 
                             return todoAsync.when(
                               data: (freshTodo) {
@@ -335,14 +335,21 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                                         .toggleLike(todo.id, currentUser!.uid);
                                   },
                                   icon: Icon(
-                                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                                    color: isFavorite ? Colors.red : Colors.grey,
+                                    isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: isFavorite
+                                        ? Colors.red
+                                        : Colors.grey,
                                   ),
                                   label: Text("$likeCount"),
                                 );
                               },
-                              loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (err, _) => const Icon(Icons.error, color: Colors.red),
+                              loading: () => const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                              error: (err, _) =>
+                                  const Icon(Icons.error, color: Colors.red),
                             );
                           },
                         ),
@@ -432,8 +439,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                                   ),
                                   child: ToDoUpdatePage(
                                     id: todos[index].id,
-                                    todoData:
-                                        todos[index],
+                                    todoData: todos[index],
                                   ),
                                 ),
                               );

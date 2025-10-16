@@ -3,7 +3,7 @@
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/profile/profile.dart';
-import 'package:bulletin_board/presentation/storage/provider_setting.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';

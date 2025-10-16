@@ -46,19 +46,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _loadProfile();
   }
 
- Future<void> _loadProfile() async {
-  final repo = ref.read(userRepositoryProvider);
-  final appUser = await repo.getUserFuture(userId: _userId);
+  Future<void> _loadProfile() async {
+    final repo = ref.read(userRepositoryProvider);
+    final appUser = await repo.getUserFuture(userId: _userId);
 
-  if (appUser != null) {
-    setState(() {
-      _nameController.text = appUser.name;
-      _emailController.text = appUser.email;
-      _addressController.text = appUser.address;
-      _uploadedImageUrl = appUser.profile;
-    });
+    if (appUser != null) {
+      setState(() {
+        _nameController.text = appUser.name;
+        _emailController.text = appUser.email;
+        _addressController.text = appUser.address;
+        _uploadedImageUrl = appUser.profile;
+      });
+    }
   }
-}
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -105,7 +105,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     await repo.updateAddress(_userId, newAddress);
     setState(() => _isEditingAddress = false);
   }
-  
+
   Future<void> _changePasswordDialog() async {
     final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
@@ -118,36 +118,39 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-              CustomTextField(
-                controller: oldPasswordController,
-                label: AppLocalizations.of(context)!.oldPsw,
-                isRequired: true,
-                maxLength: 26,
-                validator: (value) => Validators.validatePassword(
-                    value: value,
+            CustomTextField(
+              controller: oldPasswordController,
+              label: AppLocalizations.of(context)!.oldPsw,
+              isRequired: true,
+              maxLength: 26,
+              validator: (value) => Validators.validatePassword(
+                value: value,
                 labelText: AppLocalizations.of(context)!.enterOldPsw,
-                context: context),
+                context: context,
               ),
-              CustomTextField(
-                controller: newPasswordController,
-                label: AppLocalizations.of(context)!.newPsw,
-                isRequired: true,
-                maxLength: 26,
-                validator: (value) => Validators.validatePassword(
-                    value: value,
+            ),
+            CustomTextField(
+              controller: newPasswordController,
+              label: AppLocalizations.of(context)!.newPsw,
+              isRequired: true,
+              maxLength: 26,
+              validator: (value) => Validators.validatePassword(
+                value: value,
                 labelText: AppLocalizations.of(context)!.enternewPsw,
-                context: context),
+                context: context,
               ),
-              CustomTextField(
-                controller: confirmPasswordController,
-                label: AppLocalizations.of(context)!.retypeNewPsw,
-                isRequired: true,
-                maxLength: 26,
-                validator: (value) => Validators.validatePassword(
-                    value: value,
+            ),
+            CustomTextField(
+              controller: confirmPasswordController,
+              label: AppLocalizations.of(context)!.retypeNewPsw,
+              isRequired: true,
+              maxLength: 26,
+              validator: (value) => Validators.validatePassword(
+                value: value,
                 labelText: AppLocalizations.of(context)!.enterretypeNewPsw,
-                context: context),
+                context: context,
               ),
+            ),
           ],
         ),
         actions: [
@@ -162,7 +165,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               final confirmPassword = confirmPasswordController.text.trim();
 
               if (newPassword != confirmPassword) {
-                showSnackBar(context, AppLocalizations.of(context)!.passwordNotMatch, Colors.red);
+                showSnackBar(
+                  context,
+                  AppLocalizations.of(context)!.passwordNotMatch,
+                  Colors.red,
+                );
                 return;
               }
 
@@ -174,11 +181,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 await _currentUser.reauthenticateWithCredential(cred);
                 await _currentUser.updatePassword(newPassword);
                 await FirebaseFirestore.instance
-                .collection('users')
-                .doc(_userId)
-                .update({'password': newPassword});
+                    .collection('users')
+                    .doc(_userId)
+                    .update({'password': newPassword});
                 Navigator.pop(context);
-                showSnackBar(context, 'Success! New Password Updated.', Colors.green);
+                showSnackBar(
+                  context,
+                  'Success! New Password Updated.',
+                  Colors.green,
+                );
               } on FirebaseAuthException catch (e) {
                 showSnackBar(context, 'Error: ${e.message}', Colors.red);
               } catch (e) {
@@ -194,25 +205,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> logOut() async {
     ref.read(loadingProvider.notifier).state = true;
-        try {
-          final authNotifier = ref.watch(authNotifierProvider.notifier);
-          await authNotifier.signOut();
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
-          }
-      }finally {
-        if (context.mounted) {
-          ref.read(loadingProvider.notifier).state = false;
-        }
+    try {
+      final authNotifier = ref.watch(authNotifierProvider.notifier);
+      await authNotifier.signOut();
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
+      }
+    } finally {
+      if (context.mounted) {
+        ref.read(loadingProvider.notifier).state = false;
       }
     }
+  }
 
   Widget _buildEditableRow({
     required IconData icon,
@@ -235,7 +246,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   controller: controller,
                   autofocus: true,
                   obscureText: isPassword,
-                  decoration: const InputDecoration(border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               )
             : Row(
@@ -244,7 +257,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   const SizedBox(width: 8),
                   Text(
                     isPassword ? '********' : value,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -255,13 +271,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 onPressed: onPasswordEdit,
               )
             : isEditing
-                ? Row(
-                    children: [
-                      IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: onSave),
-                      IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: onCancel),
-                    ],
-                  )
-                : IconButton(icon: const Icon(Icons.edit, color: Colors.grey), onPressed: onEdit),
+            ? Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    onPressed: onSave,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: onCancel,
+                  ),
+                ],
+              )
+            : IconButton(
+                icon: const Icon(Icons.edit, color: Colors.grey),
+                onPressed: onEdit,
+              ),
       ],
     );
   }
@@ -271,7 +296,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return LoadingOverlay(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.profile,textAlign: TextAlign.start,style: TextStyle(fontSize: 20),),
+          title: Text(
+            AppLocalizations.of(context)!.profile,
+            textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 20),
+          ),
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -290,7 +319,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       : const CircleAvatar(
                           radius: 64,
                           backgroundColor: Colors.grey,
-                          child: Icon(Icons.person, size: 60, color: Colors.white),
+                          child: Icon(
+                            Icons.person,
+                            size: 60,
+                            color: Colors.white,
+                          ),
                         ),
                   Positioned(
                     bottom: 0,
@@ -301,20 +334,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text(AppLocalizations.of(context)!.selectImageSource),
+                            title: Text(
+                              AppLocalizations.of(context)!.selectImageSource,
+                            ),
                             actions: [
                               TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _pickImage(ImageSource.gallery);
-                                  },
-                                  child: Text(AppLocalizations.of(context)!.gallery)),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _pickImage(ImageSource.gallery);
+                                },
+                                child: Text(
+                                  AppLocalizations.of(context)!.gallery,
+                                ),
+                              ),
                               TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _pickImage(ImageSource.camera);
-                                  },
-                                  child: Text(AppLocalizations.of(context)!.camera)),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _pickImage(ImageSource.camera);
+                                },
+                                child: Text(
+                                  AppLocalizations.of(context)!.camera,
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -385,34 +426,47 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(AppLocalizations.of(context)!.joined,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(
+                      AppLocalizations.of(context)!.joined,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     SizedBox(width: 3),
                     Icon(Icons.calendar_today),
                     Text(
-                      DateFormat('dd/MM/yyyy')
-                          .format(_currentUser.metadata.creationTime!),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(_currentUser.metadata.creationTime!),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 40),
               TextButton.icon(
-                    onPressed: () {
-                    showConfirmationDialog(
-                      context: context,
-                      title: AppLocalizations.of(context)!.confirmLogout,
-                      confirmText: AppLocalizations.of(context)!.logout,
-                      confirmIcon: Icons.logout,
-                      confirmColor: Colors.red,
-                      onConfirm: () {
-                        logOut();
-                      },
-                    );
-                  },
-                    icon: const Icon(Icons.logout_rounded,color: Colors.red,), 
-                    label: Text(AppLocalizations.of(context)!.logout,style: TextStyle(color: Colors.red,fontSize: 18),),
-                  ),
+                onPressed: () {
+                  showConfirmationDialog(
+                    context: context,
+                    title: AppLocalizations.of(context)!.confirmLogout,
+                    confirmText: AppLocalizations.of(context)!.logout,
+                    confirmIcon: Icons.logout,
+                    confirmColor: Colors.red,
+                    onConfirm: () {
+                      logOut();
+                    },
+                  );
+                },
+                icon: const Icon(Icons.logout_rounded, color: Colors.red),
+                label: Text(
+                  AppLocalizations.of(context)!.logout,
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                ),
+              ),
             ],
           ),
         ),

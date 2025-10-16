@@ -158,7 +158,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                               showSnackBar(
                                 context,
                                 AppLocalizations.of(context)!.verify,
-                                Colors.orange,
+                                Colors.green,
                               );
                             } else {
                               Navigator.of(context).pushAndRemoveUntil<void>(

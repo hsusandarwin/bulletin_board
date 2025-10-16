@@ -6,11 +6,7 @@ enum Language {
   japanese(flag: '🇯🇵', name: '日本語', code: 'ja'),
   korean(flag: '🇰🇷', name: '한국어', code: 'ko');
 
-  const Language({
-    required this.flag,
-    required this.name,
-    required this.code,
-  });
+  const Language({required this.flag, required this.name, required this.code});
 
   final String flag;
   final String name;

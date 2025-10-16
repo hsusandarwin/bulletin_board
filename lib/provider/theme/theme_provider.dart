@@ -1,10 +1,8 @@
-import 'package:bulletin_board/presentation/storage/theme_setting.dart';
+import 'package:bulletin_board/storage/theme_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final appThemeStateNotifier = ChangeNotifierProvider(
-  (ref) => AppThemeState(),
-);
+final appThemeStateNotifier = ChangeNotifierProvider((ref) => AppThemeState());
 
 class AppThemeState extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;

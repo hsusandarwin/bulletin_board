@@ -2,25 +2,29 @@ import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/provider/user/user_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final userNotifierProvider = StateNotifierProvider.autoDispose.family<UserNotifier,UserState,User?>(
-  (ref, user) {
-    final userRepo = ref.watch(userRepositoryProvider);
-    return UserNotifier(user,userRepo);
-},);
+final userNotifierProvider = StateNotifierProvider.autoDispose
+    .family<UserNotifier, UserState, User?>((ref, user) {
+      final userRepo = ref.watch(userRepositoryProvider);
+      return UserNotifier(user, userRepo);
+    });
 
-final userNameProvider = FutureProvider.family<String, String>((ref, uid) async {
+final userNameProvider = FutureProvider.family<String, String>((
+  ref,
+  uid,
+) async {
   final repo = ref.read(userRepositoryProvider);
   return repo.getUserName(uid);
 });
 
-final userProviderFuture = FutureProvider.family<User?,String>((ref, userId){
+final userProviderFuture = FutureProvider.family<User?, String>((ref, userId) {
   final userRepository = ref.watch(userRepositoryProvider);
   return userRepository.getUserFuture(userId: userId);
 });
 
-final userProviderStream = StreamProvider.family<User?,String>((ref, userId){
+final userProviderStream = StreamProvider.family<User?, String>((ref, userId) {
   final userRepository = ref.watch(userRepositoryProvider);
   return userRepository.getUserStream(userId: userId);
 });
@@ -37,53 +41,49 @@ class UserNotifier extends StateNotifier<UserState> {
   final BaseUserRepository userRepository;
 
   Future<User?> login(String email, String password) async {
-  try {
-    final credential = await userRepository.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final firebaseUser = credential.user;
-    if (firebaseUser == null) return null;
-    var user = await userRepository.getUserByEmail(email);
-    if (user == null) {
-      user = User(
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName ?? '',
-        email: firebaseUser.email ?? '',
+    try {
+      final credential = await userRepository.signInWithEmailAndPassword(
+        email: email,
         password: password,
-        role: false,
-        address: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(), 
       );
-      await userRepository.saveUserToFirestore(user);
-    } else {
-      if (user.password != password) {
-        user = user.copyWith(
+      final firebaseUser = credential.user;
+      if (firebaseUser == null) return null;
+      var user = await userRepository.getUserByEmail(email);
+      if (user == null) {
+        user = User(
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName ?? '',
+          email: firebaseUser.email ?? '',
           password: password,
+          role: false,
+          address: '',
+          createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await userRepository.updateUser(user);
+        await userRepository.saveUserToFirestore(user);
+        await CurrentProviderSetting().update(providerId: 'password');
+      } else {
+        if (user.password != password) {
+          user = user.copyWith(password: password, updatedAt: DateTime.now());
+          await userRepository.updateUser(user);
+        }
       }
+      if (mounted) {
+        state = state.copyWith(
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          password: user.password,
+          role: user.role,
+          address: user.address,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        );
+      }
+      return user;
+    } catch (e) {
+      logger.e("Login failed: $e");
+      return null;
     }
-    if (mounted) {
-      state = state.copyWith(
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        role: user.role,
-        address: user.address,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      );
-    }
-    return user;
-  } catch (e) {
-    logger.e("Login failed: $e");
-    return null;
   }
 }
-
-}
-

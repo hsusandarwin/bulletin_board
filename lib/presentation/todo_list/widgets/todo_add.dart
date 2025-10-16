@@ -61,7 +61,10 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.addTodoPage,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(20),
@@ -86,7 +89,9 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                       isRequired: true,
                       validator: (value) => Validators.validateRequiredField(
                         value: value,
-                        labelText: AppLocalizations.of(context)!.enterDescription,
+                        labelText: AppLocalizations.of(
+                          context,
+                        )!.enterDescription,
                         context: context,
                       ),
                     ),
@@ -118,30 +123,37 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: Text(AppLocalizations.of(context)!.selectImageSource),
+                          title: Text(
+                            AppLocalizations.of(context)!.selectImageSource,
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
                                 _pickImage(ImageSource.gallery);
                               },
-                              child: Text(AppLocalizations.of(context)!.gallery),
+                              child: Text(
+                                AppLocalizations.of(context)!.gallery,
+                              ),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
                                 _pickImage(ImageSource.camera);
                               },
-                              child:Text(AppLocalizations.of(context)!.camera),
+                              child: Text(AppLocalizations.of(context)!.camera),
                             ),
                           ],
                         ),
                       );
                     },
-                    label: Text(AppLocalizations.of(context)!.uploadImage, style: TextStyle(fontSize: 20)),
+                    label: Text(
+                      AppLocalizations.of(context)!.uploadImage,
+                      style: TextStyle(fontSize: 20),
+                    ),
                     icon: const Icon(Icons.camera_alt),
                   ),
-      
+
                   if (_selectedImage != null)
                     Padding(
                       padding: const EdgeInsets.all(10),
@@ -152,16 +164,22 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
                         onPressed: isLoading
                             ? null
                             : () async {
                                 if (formKey.currentState!.validate()) {
-                                  final currentUser = auth.FirebaseAuth.instance.currentUser;
-      
-                                  await ref.read(todoNotifierProvider.notifier).addTodo(
+                                  final currentUser =
+                                      auth.FirebaseAuth.instance.currentUser;
+
+                                  await ref
+                                      .read(todoNotifierProvider.notifier)
+                                      .addTodo(
                                         title: _titlecontroller.text.trim(),
-                                        description: _despcontroller.text.trim(),
+                                        description: _despcontroller.text
+                                            .trim(),
                                         isPublish: isPublishBool,
                                         uid: currentUser?.uid ?? "unknown",
                                         imageFile: _selectedImage,
@@ -169,12 +187,26 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                                       );
                                 }
                               },
-                        child: Text(AppLocalizations.of(context)!.add, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                        child: Text(
+                          AppLocalizations.of(context)!.add,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                        ),
                         onPressed: () => Navigator.pop(context),
-                        child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                        child: Text(
+                          AppLocalizations.of(context)!.cancel,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ],
                   ),

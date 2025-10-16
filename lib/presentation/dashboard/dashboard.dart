@@ -244,7 +244,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         Consumer(
                           builder: (context, ref, _) {
-                            final todoAsync = ref.watch(todoByIdProvider(todo.id));
+                            final todoAsync = ref.watch(
+                              todoByIdProvider(todo.id),
+                            );
 
                             return todoAsync.when(
                               data: (freshTodo) {
@@ -261,14 +263,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         .toggleLike(todo.id, currentUser!.uid);
                                   },
                                   icon: Icon(
-                                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                                    color: isFavorite ? Colors.red : Colors.grey,
+                                    isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: isFavorite
+                                        ? Colors.red
+                                        : Colors.grey,
                                   ),
                                   label: Text("$likeCount"),
                                 );
                               },
-                              loading: () => const CircularProgressIndicator(strokeWidth: 2),
-                              error: (err, _) => const Icon(Icons.error, color: Colors.red),
+                              loading: () => const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                              error: (err, _) =>
+                                  const Icon(Icons.error, color: Colors.red),
                             );
                           },
                         ),

@@ -45,7 +45,8 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
         isDense: true,
         enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey)),
+          borderSide: BorderSide(color: Colors.grey),
+        ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
@@ -59,7 +60,8 @@ class CustomTextField extends StatelessWidget {
             : null,
       ),
       onChanged: onChanged,
-      validator: validator ??
+      validator:
+          validator ??
           (value) {
             if (isRequired && (value == null || value.isEmpty)) {
               return label;
@@ -72,7 +74,9 @@ class CustomTextField extends StatelessWidget {
 
 /// Builds the suffix icon for the password field
 Widget? _buildPasswordToggleIcon(
-    bool obscured, ValueChanged<bool>? onTogglePassword) {
+  bool obscured,
+  ValueChanged<bool>? onTogglePassword,
+) {
   return IconButton(
     icon: Icon(
       obscured ? Icons.visibility_off : Icons.visibility,

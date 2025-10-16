@@ -20,7 +20,6 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
@@ -31,29 +30,29 @@ class _AdminHomePageState extends ConsumerState<AdminHomePage> {
         indicatorColor: Colors.amber,
         destinations: <Widget>[
           NavigationDestination(
-            icon: Icon(Icons.dashboard), 
-            label: AppLocalizations.of(context)!.dashboard
+            icon: Icon(Icons.dashboard),
+            label: AppLocalizations.of(context)!.dashboard,
           ),
           NavigationDestination(
-            icon: Icon(Icons.book), 
-            label: AppLocalizations.of(context)!.posts
+            icon: Icon(Icons.book),
+            label: AppLocalizations.of(context)!.posts,
           ),
           NavigationDestination(
-            icon: Icon(Icons.list), 
-            label: AppLocalizations.of(context)!.userList
+            icon: Icon(Icons.list),
+            label: AppLocalizations.of(context)!.userList,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings), 
-            label: AppLocalizations.of(context)!.setting
+            icon: Icon(Icons.settings),
+            label: AppLocalizations.of(context)!.setting,
           ),
-        ]
-        ),
-        body: <Widget>[
-          DashboardPage(),
-          ToDoListPage(),
-          UserListPage(),
-          SettingPage()
-        ][currentindex],
+        ],
+      ),
+      body: <Widget>[
+        DashboardPage(),
+        ToDoListPage(),
+        UserListPage(),
+        SettingPage(),
+      ][currentindex],
     );
   }
 }

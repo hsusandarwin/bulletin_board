@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
-import 'package:bulletin_board/presentation/storage/provider_setting.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_storage/firebase_storage.dart';
@@ -23,7 +23,11 @@ abstract class BaseUserRepository {
   Future<void> saveUserToFirestore(User user);
   Future<void> updateUser(User user);
   Future<void> deleteUser(String userId);
-  Future<void> deleteUserByAdmin(String userId,String adminEmail,String adminPassword);
+  Future<void> deleteUserByAdmin(
+    String userId,
+    String adminEmail,
+    String adminPassword,
+  );
   Future<void> deleteFromStorage(String url);
   Future<void> addUser(User user, String adminEmail, String adminPassword);
   Future<void> signOut();
@@ -47,19 +51,15 @@ abstract class BaseUserRepository {
   Stream<List<User>> fetchUsers();
 }
 
-final userRepositoryProvider =
-    Provider<UserRepositoryImpl>((ref) => UserRepositoryImpl());
+final userRepositoryProvider = Provider<UserRepositoryImpl>(
+  (ref) => UserRepositoryImpl(),
+);
 
 class UserRepositoryImpl implements BaseUserRepository {
   final _auth = auth.FirebaseAuth.instance;
   final _storage = FirebaseStorage.instance;
   final _userDB = FirebaseFirestore.instance.collection('users');
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-    ],
-  );
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
   @override
   auth.User? get getCurrentUser => _auth.currentUser;
@@ -87,7 +87,7 @@ class UserRepositoryImpl implements BaseUserRepository {
     }
   }
 
- @override
+  @override
   Future<void> updateProfileUser(User user) async {
     await _userDB.doc(user.id).update(user.toJson());
   }
@@ -122,125 +122,132 @@ class UserRepositoryImpl implements BaseUserRepository {
     return doc.data()?['profile'];
   }
 
-@override
-  Future<void> addUser(User user, String adminEmail, String adminPassword) async {
-  try {
-    final userCredential = await auth.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-      email: user.email,
-      password: user.password,
-    );
-    await userCredential.user?.updateDisplayName(user.name);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userCredential.user!.uid)
-        .set(user.toJson());
-    await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: adminEmail,
-      password: adminPassword,
-    );
-
-  } on auth.FirebaseAuthException catch (e) {
-    if (e.code == 'email-already-in-use') {
-      throw Exception('Email is already used');
-    } else if (e.code == 'weak-password') {
-      throw Exception('The password provided is too weak');
-    } else {
-      throw Exception('Failed to add user: ${e.message}');
+  @override
+  Future<void> addUser(
+    User user,
+    String adminEmail,
+    String adminPassword,
+  ) async {
+    try {
+      final userCredential = await auth.FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: user.email,
+            password: user.password,
+          );
+      await userCredential.user?.updateDisplayName(user.name);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set(user.toJson());
+      await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPassword,
+      );
+    } on auth.FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw Exception('Email is already used');
+      } else if (e.code == 'weak-password') {
+        throw Exception('The password provided is too weak');
+      } else {
+        throw Exception('Failed to add user: ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Failed to add user: $e');
     }
-  } catch (e) {
-    throw Exception('Failed to add user: $e');
   }
-}
 
-@override
-Future<void> deleteUser(String userId) async {
-  try {
-    final docRef = _userDB.doc(userId);
-    final snapshot = await docRef.get();
-    if (!snapshot.exists) {
-      logger.w('User $userId does not exist');
-      return;
+  @override
+  Future<void> deleteUser(String userId) async {
+    try {
+      final docRef = _userDB.doc(userId);
+      final snapshot = await docRef.get();
+      if (!snapshot.exists) {
+        logger.w('User $userId does not exist');
+        return;
+      }
+      await docRef.delete();
+      logger.i('User $userId deleted successfully');
+    } catch (error, stackTrace) {
+      logger.e(
+        'Error deleting user: $error',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
-    await docRef.delete();
-    logger.i('User $userId deleted successfully');
-  } catch (error, stackTrace) {
-    logger.e('Error deleting user: $error', error: error, stackTrace: stackTrace);
-    rethrow;
   }
-}
 
-@override
-Future<void> deleteUserByAdmin(
-  String userId,
-  String adminEmail,
-  String adminPassword,
-) async {
-  try {
-    final firestore = FirebaseFirestore.instance;
-    final docRef = firestore.collection('users').doc(userId);
-    final snapshot = await docRef.get();
+  @override
+  Future<void> deleteUserByAdmin(
+    String userId,
+    String adminEmail,
+    String adminPassword,
+  ) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final docRef = firestore.collection('users').doc(userId);
+      final snapshot = await docRef.get();
 
-    if (!snapshot.exists) throw Exception('User not found');
+      if (!snapshot.exists) throw Exception('User not found');
 
-    final data = snapshot.data();
-    final userEmail = data?['email'] as String?;
-    final userPassword = data?['password'] as String?;
+      final data = snapshot.data();
+      final userEmail = data?['email'] as String?;
+      final userPassword = data?['password'] as String?;
 
-    if (userEmail == null || userPassword == null) {
-      throw Exception('User email or password missing in database');
+      if (userEmail == null || userPassword == null) {
+        throw Exception('User email or password missing in database');
+      }
+
+      final authInstance = auth.FirebaseAuth.instance;
+      final admin = authInstance.currentUser;
+      if (admin == null) throw Exception('Admin not logged in');
+      await authInstance.signOut();
+      final userCredential = await authInstance.signInWithEmailAndPassword(
+        email: userEmail,
+        password: userPassword,
+      );
+      await userCredential.user?.delete();
+      await docRef.delete();
+      await authInstance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPassword,
+      );
+
+      logger.i('User $userId deleted successfully by admin $adminEmail');
+    } on auth.FirebaseAuthException catch (e) {
+      logger.e('Firebase Auth Exception while deleting user: $e');
+      throw Exception('FirebaseAuth error: ${e.message}');
+    } catch (e, st) {
+      logger.e('Error deleting user: $e', error: e, stackTrace: st);
+      throw Exception('Failed to delete user: $e');
     }
-
-    final authInstance = auth.FirebaseAuth.instance;
-    final admin = authInstance.currentUser;
-    if (admin == null) throw Exception('Admin not logged in');
-    await authInstance.signOut();
-    final userCredential = await authInstance.signInWithEmailAndPassword(
-      email: userEmail,
-      password: userPassword,
-    );
-    await userCredential.user?.delete();
-    await docRef.delete();
-    await authInstance.signInWithEmailAndPassword(
-      email: adminEmail,
-      password: adminPassword,
-    );
-
-    logger.i('User $userId deleted successfully by admin $adminEmail');
-  } on auth.FirebaseAuthException catch (e) {
-    logger.e('Firebase Auth Exception while deleting user: $e');
-    throw Exception('FirebaseAuth error: ${e.message}');
-  } catch (e, st) {
-    logger.e('Error deleting user: $e', error: e, stackTrace: st);
-    throw Exception('Failed to delete user: $e');
   }
-}
 
-@override
+  @override
   Future<void> updateUser(User user) async {
-  try {
-    await _userDB.doc(user.id).set(user.toJson());
-    final currentUser = _auth.currentUser;
-    if (currentUser != null && currentUser.uid == user.id) {
-      if (user.name.isNotEmpty && user.name != currentUser.displayName) {
-        await currentUser.updateDisplayName(user.name);
+    try {
+      await _userDB.doc(user.id).set(user.toJson());
+      final currentUser = _auth.currentUser;
+      if (currentUser != null && currentUser.uid == user.id) {
+        if (user.name.isNotEmpty && user.name != currentUser.displayName) {
+          await currentUser.updateDisplayName(user.name);
+        }
+        if (user.email.isNotEmpty && user.email != currentUser.email) {
+          await currentUser.verifyBeforeUpdateEmail(user.email);
+        }
+        if (user.password.isNotEmpty) {
+          await currentUser.updatePassword(user.password);
+        }
+        await currentUser.reload();
       }
-      if (user.email.isNotEmpty && user.email != currentUser.email) {
-        await currentUser.verifyBeforeUpdateEmail(user.email);
-      }
-      if (user.password.isNotEmpty) {
-        await currentUser.updatePassword(user.password);
-      }
-      await currentUser.reload();
+    } on auth.FirebaseAuthException catch (error) {
+      logger.e('Error updating user in FirebaseAuth: $error');
+      throw Exception('Failed to update user: ${error.message}');
+    } catch (e) {
+      logger.e('Error updating user: $e');
+      throw Exception('Failed to update user: $e');
     }
-  } on auth.FirebaseAuthException catch (error) {
-    logger.e('Error updating user in FirebaseAuth: $error');
-    throw Exception('Failed to update user: ${error.message}');
-  } catch (e) {
-    logger.e('Error updating user: $e');
-    throw Exception('Failed to update user: $e');
   }
-}
 
   @override
   Future<void> register(User user) async {
@@ -317,6 +324,7 @@ Future<void> deleteUserByAdmin(
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+      await CurrentProviderSetting().update(providerId: 'google.com');
       final credential = auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -330,11 +338,11 @@ Future<void> deleteUserByAdmin(
     }
   }
 
-   @override
+  @override
   Future<void> signOut() async {
     try {
       final providerId = await CurrentProviderSetting().get() ?? '';
-      if (providerId.contains('google')) {
+      if (providerId.contains('google.com')) {
         await GoogleSignIn().signOut();
       }
       await _auth.signOut();
@@ -434,7 +442,7 @@ Future<void> deleteUserByAdmin(
 
   @override
   Future<void> create(String authUserId) async {
-  final currentUser = _auth.currentUser;
+    final currentUser = _auth.currentUser;
     if (currentUser == null) return;
     final userProviderData = UserProviderData(
       name: currentUser.displayName ?? '',
@@ -445,42 +453,48 @@ Future<void> deleteUserByAdmin(
       uid: currentUser.providerData.first.uid!,
     );
 
-  final newUser = User(
-    id: authUserId,
-    name: currentUser.displayName ?? 'New User',
-    email: currentUser.email!,
-    password: '',      
-    role: false,       
-    address: '',
-    profile: '',
-    providerData: [userProviderData],
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
+    final newUser = User(
+      id: authUserId,
+      name: currentUser.displayName ?? 'New User',
+      email: currentUser.email!,
+      password: '',
+      role: false,
+      address: '',
+      profile: '',
+      providerData: [userProviderData],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
 
-  debugPrint('Saving user: ${newUser.toJson()}');
+    debugPrint('Saving user: ${newUser.toJson()}');
 
-  await _userDB.doc(authUserId).set(newUser.toJson());
-}
+    await _userDB.doc(authUserId).set(newUser.toJson());
+  }
 
- @override
+  @override
   Future<void> updateProvider(User user) async {
     final currentUser = _auth.currentUser!;
     final authProviderType = currentUser.providerData.first.providerId;
     final providerList = user.providerData ?? [];
 
-    final providerExists = providerList.any((provider) =>
-        provider.providerType ==
-        (authProviderType == 'password' ? 'email/password' : authProviderType));
+    final providerExists = providerList.any(
+      (provider) =>
+          provider.providerType ==
+          (authProviderType == 'password'
+              ? 'email/password'
+              : authProviderType),
+    );
 
     if (!providerExists) {
       final newProviderData = UserProviderData(
-          name: currentUser.displayName ?? '',
-          email: currentUser.email!,
-          providerType:
-              authProviderType == 'password' ? 'email/password' : authProviderType,
-          uid: currentUser.providerData.first.uid!,
-          photo: currentUser.photoURL ?? '');
+        name: currentUser.displayName ?? '',
+        email: currentUser.email!,
+        providerType: authProviderType == 'password'
+            ? 'email/password'
+            : authProviderType,
+        uid: currentUser.providerData.first.uid!,
+        photo: currentUser.photoURL ?? '',
+      );
 
       final updatedUser = user.copyWith(
         providerData: [...providerList, newProviderData],
@@ -490,7 +504,7 @@ Future<void> deleteUserByAdmin(
     }
   }
 
-   @override
+  @override
   Stream<List<User>> fetchUsers() {
     return _userDB
         .orderBy('createdAt', descending: true)
@@ -500,5 +514,4 @@ Future<void> deleteUserByAdmin(
               snapshot.docs.map((doc) => User.fromJson(doc.data())).toList(),
         );
   }
-
 }

@@ -40,7 +40,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
 
   TodoNotifier(this.ref) : _repo = ref.read(todoRepositoryProvider), super([]);
 
-   Future<void> toggleLike(String todoId, String currentUid) async {
+  Future<void> toggleLike(String todoId, String currentUid) async {
     await _repo.toggleLike(todoId: todoId, currentUid: currentUid);
   }
 

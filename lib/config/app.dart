@@ -28,9 +28,7 @@ class MyApp extends HookConsumerWidget {
 
     if (!languageState.isLoaded) {
       return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -83,7 +81,6 @@ class MyApp extends HookConsumerWidget {
         error: (error, stack) =>
             const Center(child: Text('Something went wrong!')),
       ),
-
     );
   }
 }

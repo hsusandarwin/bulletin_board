@@ -4,10 +4,7 @@ class LikedByUser {
   final String uid;
   final DateTime likedAt;
 
-  LikedByUser({
-    required this.uid,
-    required this.likedAt,
-  });
+  LikedByUser({required this.uid, required this.likedAt});
 
   factory LikedByUser.fromJson(Map<String, dynamic> json) {
     return LikedByUser(
@@ -17,10 +14,7 @@ class LikedByUser {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'uid': uid,
-      'likedAt': Timestamp.fromDate(likedAt),
-    };
+    return {'uid': uid, 'likedAt': Timestamp.fromDate(likedAt)};
   }
 
   void operator [](String other) {}

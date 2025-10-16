@@ -1,5 +1,5 @@
 import 'package:bulletin_board/data/entities/user/user.dart';
-import 'package:bulletin_board/presentation/storage/provider_setting.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/provider/auth/auth_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -109,6 +109,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       );
 
       await _userRepository.saveUserToFirestore(userToSave);
+      await CurrentProviderSetting().update(providerId: 'google.com');
 
       state = state.copyWith(
         user: userToSave,
@@ -126,62 +127,63 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> loginWithGoogle() async {
-  state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
+    state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
 
-  try {
-    await _googleSignIn.signOut(); 
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      state = state.copyWith(isLoading: false);
-      return;
-    }
+    try {
+      await _googleSignIn.signOut();
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
 
-    final googleAuth = await googleUser.authentication;
+      final googleAuth = await googleUser.authentication;
 
-    final credential = firebase_auth.GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final firebaseUserCred = await firebase_auth.FirebaseAuth.instance
-        .signInWithCredential(credential);
-    final firebaseUser = firebaseUserCred.user;
-    if (firebaseUser == null) {
-      throw Exception("Failed to sign in with Google");
-    }
-
-    final email = firebaseUser.email ?? '';
-    var existingUser = await _userRepository.getUserByEmail(email);
-
-    if (existingUser == null) {
-      existingUser = User(
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName ?? '',
-        email: email,
-        password: '',
-        role: false,
-        address: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      await _userRepository.saveUserToFirestore(existingUser);
-    }
+      final firebaseUserCred = await firebase_auth.FirebaseAuth.instance
+          .signInWithCredential(credential);
+      final firebaseUser = firebaseUserCred.user;
+      if (firebaseUser == null) {
+        throw Exception("Failed to sign in with Google");
+      }
 
-    state = state.copyWith(
-      user: existingUser,
-      isLoading: false,
-      isSuccess: true,
-      errorMsg: '',
-    );
-  } catch (e) {
-    state = state.copyWith(
-      isLoading: false,
-      isSuccess: false,
-      errorMsg: 'Google login failed: $e',
-    );
+      final email = firebaseUser.email ?? '';
+      var existingUser = await _userRepository.getUserByEmail(email);
+
+      if (existingUser == null) {
+        existingUser = User(
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName ?? '',
+          email: email,
+          password: '',
+          role: false,
+          address: '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        await _userRepository.saveUserToFirestore(existingUser);
+        await CurrentProviderSetting().update(providerId: 'google.com');
+      }
+
+      state = state.copyWith(
+        user: existingUser,
+        isLoading: false,
+        isSuccess: true,
+        errorMsg: '',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        errorMsg: 'Google login failed: $e',
+      );
+    }
   }
-}
 
   Future<void> sendVerificationEmail() async {
     state = state.copyWith(isLoading: true);
@@ -227,55 +229,54 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> deleteAccount({
-  String? password, // now nullable
-  required String profileUrl,
-}) async {
-  try {
-    final currentUser = auth.FirebaseAuth.instance.currentUser;
-    if (currentUser == null) throw Exception("No user logged in");
+    String? password, // now nullable
+    required String profileUrl,
+  }) async {
+    try {
+      final currentUser = auth.FirebaseAuth.instance.currentUser;
+      if (currentUser == null) throw Exception("No user logged in");
 
-    final providerId = await CurrentProviderSetting().get() ?? '';
+      final providerId = await CurrentProviderSetting().get() ?? '';
 
-    // Delete profile image from storage if it exists
-    if (profileUrl.isNotEmpty) {
-      await _userRepository.deleteFromStorage(profileUrl);
-    }
-
-    // Reauthentication depending on the provider
-    if (providerId.contains('password')) {
-      // Only require password for email/password accounts
-      if (password == null || password.isEmpty) {
-        throw Exception("Password is required for reauthentication");
+      // Delete profile image from storage if it exists
+      if (profileUrl.isNotEmpty) {
+        await _userRepository.deleteFromStorage(profileUrl);
       }
 
-      final credential = auth.EmailAuthProvider.credential(
-        email: currentUser.email!,
-        password: password,
-      );
-      await currentUser.reauthenticateWithCredential(credential);
-    } else if (providerId.contains('google')) {
-      final googleProvider = auth.GoogleAuthProvider();
-      await currentUser.reauthenticateWithProvider(googleProvider);
-    }
+      // Reauthentication depending on the provider
+      if (providerId.contains('password')) {
+        // Only require password for email/password accounts
+        if (password == null || password.isEmpty) {
+          throw Exception("Password is required for reauthentication");
+        }
 
-    await _userRepository.deleteUser(currentUser.uid);
-    await currentUser.delete();
+        final credential = auth.EmailAuthProvider.credential(
+          email: currentUser.email!,
+          password: password,
+        );
+        await currentUser.reauthenticateWithCredential(credential);
+      } else if (providerId.contains('google')) {
+        final googleProvider = auth.GoogleAuthProvider();
+        await currentUser.reauthenticateWithProvider(googleProvider);
+      }
 
-    await _userRepository.signOut();
+      await _userRepository.deleteUser(currentUser.uid);
+      await currentUser.delete();
 
-  } on auth.FirebaseAuthException catch (e) {
-    if (e.code == 'requires-recent-login') {
-      logger.e("Reauthentication required: ${e.message}");
-      throw Exception("Please log in again before deleting your account.");
-    } else {
-      logger.e("Auth Error: ${e.code} - ${e.message}");
+      await _userRepository.signOut();
+    } on auth.FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        logger.e("Reauthentication required: ${e.message}");
+        throw Exception("Please log in again before deleting your account.");
+      } else {
+        logger.e("Auth Error: ${e.code} - ${e.message}");
+        rethrow;
+      }
+    } catch (e) {
+      logger.e("Delete Error: $e");
       rethrow;
     }
-  } catch (e) {
-    logger.e("Delete Error: $e");
-    rethrow;
   }
-}
 
   Future<void> getUserFuture({required String authUserId}) async {
     // Try to fetch the user from Firestore

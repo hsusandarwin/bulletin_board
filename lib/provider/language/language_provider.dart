@@ -1,10 +1,11 @@
-import 'package:bulletin_board/presentation/storage/language_setting.dart';
+import 'package:bulletin_board/storage/language_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'language.dart';
 
-final languageNotifierProvider =
-    ChangeNotifierProvider<LanguageNotifier>((ref) => LanguageNotifier());
+final languageNotifierProvider = ChangeNotifierProvider<LanguageNotifier>(
+  (ref) => LanguageNotifier(),
+);
 
 class LanguageNotifier extends ChangeNotifier {
   Language _language = Language.english;

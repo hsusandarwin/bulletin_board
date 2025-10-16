@@ -29,24 +29,24 @@ class _UserHomePageState extends ConsumerState<UserHomePage> {
         indicatorColor: Colors.amber,
         destinations: <Widget>[
           NavigationDestination(
-            icon: Icon(Icons.dashboard), 
-            label: AppLocalizations.of(context)!.dashboard
-            ),
+            icon: Icon(Icons.dashboard),
+            label: AppLocalizations.of(context)!.dashboard,
+          ),
           NavigationDestination(
-            icon: Icon(Icons.book), 
-            label: AppLocalizations.of(context)!.posts
-            ),
-            NavigationDestination(
-            icon: Icon(Icons.settings),  
-            label: AppLocalizations.of(context)!.setting
-            ),
-        ]
-        ), 
-        body: <Widget>[
-          DashboardPage(),
-          ToDoListPage(),
-          SettingPage()
-        ][currentindex],
+            icon: Icon(Icons.book),
+            label: AppLocalizations.of(context)!.posts,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings),
+            label: AppLocalizations.of(context)!.setting,
+          ),
+        ],
+      ),
+      body: <Widget>[
+        DashboardPage(),
+        ToDoListPage(),
+        SettingPage(),
+      ][currentindex],
     );
   }
 }

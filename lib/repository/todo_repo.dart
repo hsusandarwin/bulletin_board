@@ -31,10 +31,7 @@ abstract class BaseTodoRepository {
   Future<void> deleteTodo(String todoId);
   Future<void> deleteTodoListByUser(String uid);
   Stream<Todo> getTodoById(String id);
-  Future<void> toggleLike({
-  required String todoId,
-  required String currentUid,
-});
+  Future<void> toggleLike({required String todoId, required String currentUid});
   Stream<List<Todo>> getRecentLikePostList();
   Stream<List<Todo>> getTodosByUser(String uid);
   Stream<List<Todo>> getPublishedTodos();
@@ -234,54 +231,48 @@ class TodoRepositoryImpl implements BaseTodoRepository {
               snapshot.docs.map((doc) => Todo.fromJson(doc.data())).toList(),
         );
   }
-@override
-Stream<Todo> getTodoById(String id) {
-  return _todoDB
-      .doc(id)
-      .snapshots()
-      .map((doc) => Todo.fromJson(doc.data()!));
-}
 
-@override
-Future<void> toggleLike({
-  required String todoId,
-  required String currentUid,
-}) async {
-  final docRef = _todoDB.doc(todoId);
-  final docSnap = await docRef.get();
-  if (!docSnap.exists) return;
+  @override
+  Stream<Todo> getTodoById(String id) {
+    return _todoDB.doc(id).snapshots().map((doc) => Todo.fromJson(doc.data()!));
+  }
 
-  final data = docSnap.data() as Map<String, dynamic>;
-  final List likedBy = List.from(data['likedByUsers'] ?? []);
+  @override
+  Future<void> toggleLike({
+    required String todoId,
+    required String currentUid,
+  }) async {
+    final docRef = _todoDB.doc(todoId);
+    final docSnap = await docRef.get();
+    if (!docSnap.exists) return;
 
-  bool alreadyLiked = likedBy.any((u) {
-    if (u is Map && u['uid'] != null) return u['uid'] == currentUid;
-    if (u is String) return u == currentUid;
-    return false;
-  });
+    final data = docSnap.data() as Map<String, dynamic>;
+    final List likedBy = List.from(data['likedByUsers'] ?? []);
 
-  if (alreadyLiked) {
-    likedBy.removeWhere((u) {
+    bool alreadyLiked = likedBy.any((u) {
       if (u is Map && u['uid'] != null) return u['uid'] == currentUid;
       if (u is String) return u == currentUid;
       return false;
     });
 
-    await docRef.update({
-      'likedByUsers': likedBy,
-      'likesCount': FieldValue.increment(-1),
-    });
-  } else {
-    likedBy.add({
-      'uid': currentUid,
-      'likedAt': Timestamp.now(),
-    });
+    if (alreadyLiked) {
+      likedBy.removeWhere((u) {
+        if (u is Map && u['uid'] != null) return u['uid'] == currentUid;
+        if (u is String) return u == currentUid;
+        return false;
+      });
 
-    await docRef.update({
-      'likedByUsers': likedBy,
-      'likesCount': FieldValue.increment(1),
-    });
+      await docRef.update({
+        'likedByUsers': likedBy,
+        'likesCount': FieldValue.increment(-1),
+      });
+    } else {
+      likedBy.add({'uid': currentUid, 'likedAt': Timestamp.now()});
+
+      await docRef.update({
+        'likedByUsers': likedBy,
+        'likesCount': FieldValue.increment(1),
+      });
+    }
   }
-}
-
 }

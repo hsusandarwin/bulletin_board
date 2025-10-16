@@ -21,16 +21,10 @@ void showSnackBar(BuildContext context, String msg, MaterialColor? color) {
         ),
         const ColoredBox(
           color: Color(0xFFF4F4F4),
-          child: SizedBox(
-            width: 1,
-            height: 23,
-          ),
+          child: SizedBox(width: 1, height: 23),
         ),
         IconButton(
-          icon: const Icon(
-            Icons.close,
-            size: 20,
-          ),
+          icon: const Icon(Icons.close, size: 20),
           color: const Color(0xFFF61202),
           onPressed: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -65,9 +59,7 @@ Future<void> showConfirmationDialog({
         scrollDirection: Axis.horizontal,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title),
-          ],
+          children: [Text(title)],
         ),
       ),
       actions: [
@@ -78,9 +70,7 @@ Future<void> showConfirmationDialog({
           },
           icon: Icon(confirmIcon, color: Colors.white),
           label: Text(confirmText, style: const TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: confirmColor,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: confirmColor),
         ),
         const SizedBox(width: 20),
         ElevatedButton.icon(
@@ -88,10 +78,11 @@ Future<void> showConfirmationDialog({
             Navigator.pop(context);
           },
           icon: const Icon(Icons.close, color: Colors.white),
-          label: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+          label: Text(
+            AppLocalizations.of(context)!.cancel,
+            style: const TextStyle(color: Colors.white),
           ),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
         ),
       ],
     ),
@@ -143,8 +134,7 @@ Future<void> showEmailVerifiedDialog({
                             await onSave();
                           } on Exception catch (e) {
                             if (context.mounted) {
-                              showSnackBar(context, e.toString(),
-                                  Colors.red);
+                              showSnackBar(context, e.toString(), Colors.red);
                             }
                           } finally {
                             if (context.mounted) {
@@ -206,9 +196,19 @@ Future<void> accountDeleteConfirmationDialog({
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 10),
-                Text(message, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
                 if (password)
                   Padding(
                     padding: const EdgeInsets.only(top: 15, bottom: 5),
@@ -227,15 +227,24 @@ Future<void> accountDeleteConfirmationDialog({
                               controller: controller,
                               obscureText: !value,
                               decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!.password,
+                                labelText: AppLocalizations.of(
+                                  context,
+                                )!.password,
                                 suffixIcon: IconButton(
-                                  icon: Icon(value ? Icons.visibility : Icons.visibility_off),
-                                  onPressed: () => isPasswordVisible.value = !value,
+                                  icon: Icon(
+                                    value
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                  onPressed: () =>
+                                      isPasswordVisible.value = !value,
                                 ),
                               ),
                               validator: (val) {
                                 if (val == null || val.isEmpty) {
-                                  return AppLocalizations.of(context)!.enterPassword;
+                                  return AppLocalizations.of(
+                                    context,
+                                  )!.enterPassword;
                                 }
                                 return null;
                               },
@@ -253,22 +262,28 @@ Future<void> accountDeleteConfirmationDialog({
               children: [
                 Expanded(
                   child: TextButton(
-                    child: Text(cancelButton,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.lightGreen)),
+                    child: Text(
+                      cancelButton,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.lightGreen,
+                      ),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
                 if (okButton != null && okButton.isNotEmpty)
                   Expanded(
                     child: TextButton(
-                      child: Text(okButton,
-                          style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w700)),
+                      child: Text(
+                        okButton,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       onPressed: () {
                         if (formKey.currentState?.validate() ?? false) {
                           Navigator.of(context).pop();
@@ -299,9 +314,10 @@ Future<String?> showAdminPasswordDialog(BuildContext context) async {
         isRequired: true,
         maxLength: 26,
         validator: (value) => Validators.validatePassword(
-            value: value,
-            labelText: AppLocalizations.of(context)!.enterPassword,
-            context: context),
+          value: value,
+          labelText: AppLocalizations.of(context)!.enterPassword,
+          context: context,
+        ),
       ),
       actions: [
         TextButton(

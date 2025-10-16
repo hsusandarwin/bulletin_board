@@ -23,5 +23,3 @@ class LikedByUserListConverter
     return users.map((e) => e.toJson()).toList();
   }
 }
-
-

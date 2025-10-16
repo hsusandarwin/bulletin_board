@@ -11,7 +11,7 @@ abstract class UserProviderData with _$UserProviderData {
     @Default('') String name,
     @Default('') String providerType,
     @Default('') String photo,
-  }) = _UserProviderData; 
+  }) = _UserProviderData;
 
   factory UserProviderData.fromJson(Map<String, dynamic> json) =>
       _$UserProviderDataFromJson(json);
