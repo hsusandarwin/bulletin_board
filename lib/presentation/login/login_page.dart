@@ -21,7 +21,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-
 class LoginPage extends StatefulHookConsumerWidget {
   const LoginPage({super.key});
 
@@ -33,7 +32,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
   bool isPasswordVisible = false;
   final emailController = TextEditingController();
   final pswController = TextEditingController();
-  
+
   @override
   Widget build(BuildContext context) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
@@ -42,7 +41,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
     return LoadingOverlay(
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.only(top: 50,bottom: 50),
+          padding: const EdgeInsets.only(top: 50, bottom: 50),
           child: SingleChildScrollView(
             child: Container(
               padding: EdgeInsets.all(20),
@@ -51,175 +50,235 @@ class LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(AppLocalizations.of(context)!.loginPage,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        child:  CustomTextField(
-                          controller: emailController,
-                          label: AppLocalizations.of(context)!.email,
-                          maxLength: 40,
-                          isRequired: true,
-                          validator: (value) => Validators.validateEmail(
-                            value: value,
-                            labelText: AppLocalizations.of(context)!.enterEmail,
-                            context: context,
-                          ),
+                    Text(
+                      AppLocalizations.of(context)!.loginPage,
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      child: CustomTextField(
+                        controller: emailController,
+                        label: AppLocalizations.of(context)!.email,
+                        maxLength: 40,
+                        isRequired: true,
+                        validator: (value) => Validators.validateEmail(
+                          value: value,
+                          labelText: AppLocalizations.of(context)!.enterEmail,
+                          context: context,
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        child: CustomTextField(
-                          controller: pswController,
-                          label: AppLocalizations.of(context)!.password,
-                          isRequired: true,
-                          maxLength: 26,
-                          obscured: !isPasswordVisible,
-                          validator: (value) => Validators.validatePassword(
-                              value: value,
-                              labelText: AppLocalizations.of(context)!.enterPassword,
-                              context: context),
-                          onTogglePassword: (isVisible) {
-                            setState(() {
-                              isPasswordVisible = !isVisible;
-                            });
-                          },
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      child: CustomTextField(
+                        controller: pswController,
+                        label: AppLocalizations.of(context)!.password,
+                        isRequired: true,
+                        maxLength: 26,
+                        obscured: !isPasswordVisible,
+                        validator: (value) => Validators.validatePassword(
+                          value: value,
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.enterPassword,
+                          context: context,
                         ),
+                        onTogglePassword: (isVisible) {
+                          setState(() {
+                            isPasswordVisible = !isVisible;
+                          });
+                        },
                       ),
-                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                         children: [
-                           TextButton(onPressed: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => ForgetPasswordPage()));
-                            }, child: Text(AppLocalizations.of(context)!.forgetPassword,style: TextStyle(color: const Color(0xFF060186)),)
-                                             ),
-                         ],
-                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
-                        onPressed: () async {
-                          final form = formKey.currentState;
-                          if (form == null || !form.validate()) {
-                            return;
-                          }
-
-                          ref.read(loadingProvider.notifier).state = true;
-
-                          final email = emailController.text.trim();
-                          final password = pswController.text.trim();
-
-                          final notifier = ref.read(userNotifierProvider(null).notifier);
-
-                          try {
-                            final User? user = await notifier.login(email, password);
-
-                            if (!isMounted()) return;
-
-                            if (user != null) {
-                              final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
-                              await firebaseUser?.reload();
-                              final isVerified = firebaseUser?.emailVerified ?? false;
-
-                              if (!isVerified) {
-                                Navigator.of(context).pushAndRemoveUntil<void>(
-                                  MaterialPageRoute(
-                                    builder: (context) => const EmailVerificationPage(),
-                                  ),
-                                  (route) => false,
-                                );
-
-                                showSnackBar(
-                                  context,
-                                  AppLocalizations.of(context)!.verify,
-                                  Colors.orange,
-                                );
-                              } else {
-                                Navigator.of(context).pushAndRemoveUntil<void>(
-                                  MaterialPageRoute(
-                                    builder: (context) => const MyApp(),
-                                  ),
-                                  (route) => false,
-                                );
-
-                                showSnackBar(
-                                  context,
-                                  AppLocalizations.of(context)!.successLogin,
-                                  Colors.green,
-                                );
-                              }
-                            } else {
-                              showSnackBar(
-                                context,
-                                AppLocalizations.of(context)!.invalidEmailPsw,
-                                Colors.red,
-                              );
-                            }
-                          } catch (e) {
-                            if (!isMounted()) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${AppLocalizations.of(context)!.failLogin}: $e',
-                                ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ForgetPasswordPage(),
                               ),
                             );
-                          } finally {
-                            if (context.mounted) {
-                              ref.read(loadingProvider.notifier).state = false;
-                            }
-                          }
-                        },
-                        child: Text(
-                          AppLocalizations.of(context)!.login,
-                          style: const TextStyle(fontSize: 20, color: Colors.white),
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.forgetPassword,
+                            style: TextStyle(color: const Color(0xFF060186)),
+                          ),
                         ),
+                      ],
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
                       ),
-                      Image.asset('assets/login/OR.png'),
-                      TextButton.icon(
-                       onPressed: () async {
-                        final notifier = ref.read(authNotifierProvider.notifier);
+                      onPressed: () async {
+                        final form = formKey.currentState;
+                        if (form == null || !form.validate()) {
+                          return;
+                        }
+
                         ref.read(loadingProvider.notifier).state = true;
-                       try{
-                         await notifier.loginWithGoogle();
-                
-                        final state = ref.read(authNotifierProvider);
-                
-                        if (state.isSuccess && state.user != null) {
-                          showSnackBar(context, "${AppLocalizations.of(context)!.welcome} ${state.user!.name}", Colors.green);
-                          if (state.user!.role == false) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const UserHomePage()),
-                            );
+
+                        final email = emailController.text.trim();
+                        final password = pswController.text.trim();
+
+                        final notifier = ref.read(
+                          userNotifierProvider(null).notifier,
+                        );
+
+                        try {
+                          final User? user = await notifier.login(
+                            email,
+                            password,
+                          );
+
+                          if (!isMounted()) return;
+
+                          if (user != null) {
+                            final firebaseUser =
+                                firebase_auth.FirebaseAuth.instance.currentUser;
+                            await firebaseUser?.reload();
+                            final isVerified =
+                                firebaseUser?.emailVerified ?? false;
+
+                            if (!isVerified) {
+                              Navigator.of(context).pushAndRemoveUntil<void>(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const EmailVerificationPage(),
+                                ),
+                                (route) => false,
+                              );
+
+                              showSnackBar(
+                                context,
+                                AppLocalizations.of(context)!.verify,
+                                Colors.orange,
+                              );
+                            } else {
+                              Navigator.of(context).pushAndRemoveUntil<void>(
+                                MaterialPageRoute(
+                                  builder: (context) => const MyApp(),
+                                ),
+                                (route) => false,
+                              );
+
+                              showSnackBar(
+                                context,
+                                AppLocalizations.of(context)!.successLogin,
+                                Colors.green,
+                              );
+                            }
                           } else {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const AdminHomePage()),
+                            showSnackBar(
+                              context,
+                              AppLocalizations.of(context)!.invalidEmailPsw,
+                              Colors.red,
                             );
                           }
-                
-                        } else if (state.errorMsg.isNotEmpty) {
-                          showSnackBar(context, state.errorMsg, Colors.red);
-                        }
-                       }catch(e){
-                        if (context.mounted) {
-                          showSnackBar(context, e.toString(), Colors.red);
-            
-                        }
-                       }finally {
+                        } catch (e) {
+                          if (!isMounted()) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${AppLocalizations.of(context)!.failLogin}: $e',
+                              ),
+                            ),
+                          );
+                        } finally {
+                          if (context.mounted) {
                             ref.read(loadingProvider.notifier).state = false;
                           }
+                        }
                       },
-                        icon:  FaIcon(FontAwesomeIcons.google,color: Colors.red,size: 30,),
-                        label: Text(AppLocalizations.of(context)!.loginGoogle,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,))
+                      child: Text(
+                        AppLocalizations.of(context)!.login,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
                         ),
-                      TextButton(onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage()));
-                        }, child: Text(AppLocalizations.of(context)!.askRegister,style: TextStyle(color: Colors.deepPurpleAccent),)
                       ),
+                    ),
+                    Image.asset('assets/login/OR.png'),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final notifier = ref.read(
+                          authNotifierProvider.notifier,
+                        );
+                        ref.read(loadingProvider.notifier).state = true;
+                        try {
+                          await notifier.loginWithGoogle();
+
+                          final state = ref.read(authNotifierProvider);
+
+                          if (state.isSuccess && state.user != null) {
+                            showSnackBar(
+                              context,
+                              "${AppLocalizations.of(context)!.welcome} ${state.user!.name}",
+                              Colors.green,
+                            );
+                            if (state.user!.role == false) {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => const UserHomePage(),
+                                ),
+                              );
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => const AdminHomePage(),
+                                ),
+                              );
+                            }
+                          } else if (state.errorMsg.isNotEmpty) {
+                            showSnackBar(context, state.errorMsg, Colors.red);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showSnackBar(context, e.toString(), Colors.red);
+                          }
+                        } finally {
+                          ref
+                              .read(loadingProvider.notifier)
+                              .update((state) => false);
+                        }
+                      },
+                      icon: FaIcon(
+                        FontAwesomeIcons.google,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                      label: Text(
+                        AppLocalizations.of(context)!.loginGoogle,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RegisterPage(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        AppLocalizations.of(context)!.askRegister,
+                        style: TextStyle(color: Colors.deepPurpleAccent),
+                      ),
+                    ),
                   ],
-                )
                 ),
-            )
+              ),
+            ),
           ),
         ),
       ),

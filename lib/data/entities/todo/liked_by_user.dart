@@ -22,4 +22,6 @@ class LikedByUser {
       'likedAt': Timestamp.fromDate(likedAt),
     };
   }
+
+  void operator [](String other) {}
 }

@@ -3,6 +3,7 @@
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/profile/profile.dart';
+import 'package:bulletin_board/presentation/storage/provider_setting.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
@@ -22,7 +23,6 @@ class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});
 
   User get _currentUser => FirebaseAuth.instance.currentUser!;
-  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,39 +31,36 @@ class SettingPage extends HookConsumerWidget {
 
     final isDark = appThemeState.themeMode == ThemeMode.dark;
 
-    final providerId = useState<String?>('');
     final passwordInputController = useTextEditingController();
 
     final authStateNotifier = ref.watch(authNotifierProvider.notifier);
     final todoListStateNotifier = ref.watch(todoNotifierProvider.notifier);
 
     Future<void> logOut() async {
-      ref.read(loadingProvider.notifier).state = true;
-        try {
-          final authNotifier = ref.watch(authNotifierProvider.notifier);
-          await authNotifier.signOut();
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
-          }
-      }finally {
+      try {
+        final authNotifier = ref.watch(authNotifierProvider.notifier);
+        await authNotifier.signOut();
         if (context.mounted) {
-          ref.read(loadingProvider.notifier).state = false;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
         }
       }
     }
-    
+
     return LoadingOverlay(
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text(AppLocalizations.of(context)!.setting,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
+          title: Text(
+            AppLocalizations.of(context)!.setting,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -72,32 +69,41 @@ class SettingPage extends HookConsumerWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      color: Colors.grey
-                    ),
+                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.grey,
+                ),
                 child: ListTile(
-                  leading: const Icon(Icons.person,size: 35,color: Colors.white,),
+                  leading: const Icon(
+                    Icons.person,
+                    size: 35,
+                    color: Colors.white,
+                  ),
                   title: Text(AppLocalizations.of(context)!.profile),
                   titleTextStyle: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 17,color: Colors.white),
-                  onTap: () =>
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()))
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ProfilePage()),
+                  ),
                 ),
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 20,
-              ),
+              Divider(color: Colors.grey, thickness: 1, height: 20),
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: Colors.grey, 
+                  color: Colors.grey,
                 ),
                 child: ListTile(
                   title: Text(
                     AppLocalizations.of(context)!.darkmode,
-                    style: const TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   trailing: Switch(
                     value: isDark,
@@ -111,11 +117,7 @@ class SettingPage extends HookConsumerWidget {
                   ),
                 ),
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 20,
-              ),
+              Divider(color: Colors.grey, thickness: 1, height: 20),
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
@@ -124,7 +126,11 @@ class SettingPage extends HookConsumerWidget {
                 child: ListTile(
                   title: Text(
                     AppLocalizations.of(context)!.language,
-                    style: const TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   trailing: DropdownButton<Language>(
                     value: languageState.language,
@@ -136,25 +142,24 @@ class SettingPage extends HookConsumerWidget {
                     }).toList(),
                     onChanged: (Language? newLang) {
                       if (newLang != null) {
-                        ref.read(languageNotifierProvider.notifier).setLanguage(newLang);
+                        ref
+                            .read(languageNotifierProvider.notifier)
+                            .setLanguage(newLang);
                       }
                     },
                   ),
                 ),
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 20,
-              ),
+              Divider(color: Colors.grey, thickness: 1, height: 20),
               TextButton.icon(
                 onPressed: () async {
                   // ignore: dead_code, unnecessary_null_comparison
                   if (_currentUser == null) return;
-      
-                  final provider = providerId.value ?? '';
+                  final providerId = await CurrentProviderSetting().get() ?? '';
+                  final provider = providerId;
+                  logger.f('provider -->$provider');
                   final isPassword = provider == 'password';
-      
+
                   await accountDeleteConfirmationDialog(
                     context: context,
                     title: AppLocalizations.of(context)!.deleteAccount,
@@ -163,40 +168,43 @@ class SettingPage extends HookConsumerWidget {
                     passwordController: passwordInputController,
                     okFunction: (enteredPassword) async {
                       try {
-                        ref.watch(loadingProvider.notifier).update((state) => true);
-                        await todoListStateNotifier.deleteTodoByUser(_currentUser.uid);
+                        ref
+                            .watch(loadingProvider.notifier)
+                            .update((state) => true);
+                        await todoListStateNotifier.deleteTodoByUser(
+                          _currentUser.uid,
+                        );
                         await authStateNotifier.deleteAccount(
                           password: enteredPassword,
                           profileUrl: _currentUser.photoURL ?? '',
                         );
-      
+
                         if (!context.mounted) return;
-                          logOut();
-                           showSnackBar(
-                              context,
-                              AppLocalizations.of(context)!.successDelete,
-                              Colors.green,
-                            );
+                        await logOut();
+                        showSnackBar(
+                          context,
+                          AppLocalizations.of(context)!.successDelete,
+                          Colors.green,
+                        );
                       } catch (e) {
                         logger.e("Delete Error: $e");
                         if (!context.mounted) return;
-                         showSnackBar(
-                            context,
-                            AppLocalizations.of(context)!.failDelete,
-                            Colors.red,
-                          );
+                        showSnackBar(
+                          context,
+                          AppLocalizations.of(context)!.failDelete,
+                          Colors.red,
+                        );
                       } finally {
-                        ref.watch(loadingProvider.notifier).update((state) => false);
+                        ref
+                            .watch(loadingProvider.notifier)
+                            .update((state) => false);
                       }
                     },
                     okButton: AppLocalizations.of(context)!.delete,
                     cancelButton: AppLocalizations.of(context)!.cancel,
                   );
                 },
-                icon: const Icon(
-                  Icons.delete_forever,
-                  color: Colors.red,
-                ),
+                icon: const Icon(Icons.delete_forever, color: Colors.red),
                 label: Text(
                   AppLocalizations.of(context)!.deleteAccount,
                   style: const TextStyle(
@@ -206,35 +214,30 @@ class SettingPage extends HookConsumerWidget {
                   ),
                 ),
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 20,
-              ),
+              Divider(color: Colors.grey, thickness: 1, height: 20),
               TextButton.icon(
                 onPressed: () {
-                showConfirmationDialog(
-                  context: context,
-                  title: AppLocalizations.of(context)!.confirmLogout,
-                  confirmText: AppLocalizations.of(context)!.logout,
-                  confirmIcon: Icons.logout,
-                  confirmColor: Colors.red,
-                  onConfirm: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginPage()),
-                    );
-                  },
-                );
-              },
-                icon: const Icon(Icons.logout_rounded,color: Colors.red,), 
-                label: Text(AppLocalizations.of(context)!.logout,style: TextStyle(color: Colors.red,fontSize: 18),),
+                  showConfirmationDialog(
+                    context: context,
+                    title: AppLocalizations.of(context)!.confirmLogout,
+                    confirmText: AppLocalizations.of(context)!.logout,
+                    confirmIcon: Icons.logout,
+                    confirmColor: Colors.red,
+                    onConfirm: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.logout_rounded, color: Colors.red),
+                label: Text(
+                  AppLocalizations.of(context)!.logout,
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                ),
               ),
-               Divider(
-                color: Colors.grey,
-                thickness: 1,
-                height: 20,
-              ),
+              Divider(color: Colors.grey, thickness: 1, height: 20),
             ],
           ),
         ),

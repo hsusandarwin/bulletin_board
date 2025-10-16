@@ -2,9 +2,10 @@ import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_add.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_update.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
+import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
+import 'package:bulletin_board/provider/user/user_notifier.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,10 +19,6 @@ class UserListPage extends ConsumerStatefulWidget {
 }
 
 class _UserListPageState extends ConsumerState<UserListPage> {
-  final Stream<QuerySnapshot<Map<String, dynamic>>> usersCollection = FirebaseFirestore.instance
-  .collection('users')
-  .orderBy('createdAt',descending: true)
-  .snapshots();
   
       String searchQuery = "";
 
@@ -41,92 +38,82 @@ class _UserListPageState extends ConsumerState<UserListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(AppLocalizations.of(context)!.userList,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
+  final usersAsync = ref.watch(fetchUsersProvider);
+
+  final usersCollection = usersAsync.when(
+    data: (data) => data,         
+    loading: () => null,     
+    error: (e, stack) => null, 
+  );
+
+  if (usersCollection == null) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  final filteredUsers = usersCollection.where((user) {
+    final name = user.name.toLowerCase();
+    final email = user.email.toLowerCase();
+    final address = user.address.toLowerCase();
+    final role = (user.role == true ? 'admin' : 'user').toLowerCase();
+
+    final combined = "$name $email $address $role";
+    return combined.contains(searchQuery.toLowerCase());
+  }).toList();
+
+  final todoListStateNotifier = ref.watch(todoNotifierProvider.notifier);
+
+  return Scaffold(
+    appBar: AppBar(
+      automaticallyImplyLeading: false,
+      title: Text(
+        AppLocalizations.of(context)!.userList,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
       ),
-      body: Column(
-        children: [
-             Container(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.search,
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value.toLowerCase(); 
-                });
-              },
+    ),
+    body: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.search,
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
             ),
+            onChanged: (value) {
+              setState(() {
+                searchQuery = value.toLowerCase();
+              });
+            },
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: usersCollection,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-            
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-            
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No users found"));
-                }
-            
-                final users = snapshot.data!.docs;
-                final filteredUsers = users.where((doc) {
-                final userData = doc.data() as Map<String, dynamic>;
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(10),
+            itemCount: filteredUsers.length,
+            itemBuilder: (context, index) {
+              final user = filteredUsers[index];
 
-                final name = (userData['displayName'] ?? '').toString().toLowerCase();
-                final email = (userData['email'] ?? '').toString().toLowerCase();
-                final address = (userData['address'] ?? '').toString().toLowerCase();
-                final role = (userData['role'] == true ? 'admin' : 'user').toLowerCase();
+              final name = user.name;
+              final email = user.email;
+              final address = user.address;
+              final role = user.role == true ? 'admin' : 'user';
+              final createdAtDate = user.createdAt;
 
-                final combined = "$name $email $address $role";
-                return combined.contains(searchQuery.toLowerCase());
-              }).toList();
-
-                final todoListStateNotifier = ref.watch(todoNotifierProvider.notifier);
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  itemCount: filteredUsers.length,
-                  itemBuilder: (context, index) {
-                    final userData = filteredUsers[index].data() as Map<String, dynamic>;
-            
-                    final name = userData['displayName'] ?? 'No Name';
-                    final email = userData['email'] ?? 'No Email';
-                    final address = userData['address'] ?? 'No Address';
-                    final role = (userData['role'] == true) ? 'admin' : 'user';
-                    final createdAt = userData['createdAt'];
-                    DateTime? createdAtDate;
-
-                    if (createdAt is Timestamp) {
-                      createdAtDate = createdAt.toDate();
-                    } else if (createdAt is DateTime) {
-                      createdAtDate = createdAt;
-                    }
-            
-                    return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey,
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.grey,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -149,9 +136,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                     Icon(Icons.calendar_today),
                                     SizedBox(width: 3),
                                     Text(
-                                      createdAtDate != null
-                                          ? DateFormat('dd/MM/yyyy').format(createdAtDate)
-                                          : '',
+                                      DateFormat('dd/MM/yyyy').format(createdAtDate),
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                   ],
@@ -169,8 +154,8 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                       borderRadius: BorderRadius.all(Radius.circular(20)),
                                     ),
                                      child: UserUpdatePage(
-                                      userId: users[index].id,
-                                      userData: users[index].data() as Map<String, dynamic>,
+                                      userId: user.id,
+                                      userData: user.toJson(),
                                     ),
                                   ),
                                 );
@@ -184,6 +169,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                   confirmIcon: Icons.delete,
                                   confirmColor: Colors.red,
                                   onConfirm: () async {
+                                    ref.read(loadingProvider.notifier).state = true;
                                     try {
                                       final currentUser = FirebaseAuth.instance.currentUser;
                                       if (currentUser == null) {
@@ -199,7 +185,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                       if (adminPassword == null) return;
 
                                       final userRepository = ref.read(userRepositoryProvider);
-                                      final userId = users[index].id;
+                                      final userId = user.id;
 
                                       await userRepository.deleteUserByAdmin(userId, adminEmail, adminPassword);
                                       await todoListStateNotifier.deleteTodoByUser(userId);
@@ -219,6 +205,10 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                         '${AppLocalizations.of(context)?.failDelete ?? "Failed to delete"} - $e',
                                         Colors.red,
                                       );
+                                    } finally {
+                                      if (context.mounted) {
+                                        ref.read(loadingProvider.notifier).state = false;
+                                      }
                                     }
                                   },
                                 );
@@ -230,9 +220,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                       ),
                     );
                   },
-                );
-              },
-            ),
+                ),
           ),
         ],
       ),

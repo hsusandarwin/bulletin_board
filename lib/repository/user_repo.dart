@@ -38,6 +38,13 @@ abstract class BaseUserRepository {
   Future<void> updateDisplayName(String userId, String name);
   Future<String?> loadProfileImage(String userId);
   Future<String> getUserName(String uid);
+  Future<void> updateProfileUser(User user);
+  Future<String?> uploadProfilePhoto(File imageFile, String userId);
+  Future<void> updateProfileDisplayName(String userId, String name);
+  Future<void> updateEmail(String userId, String email);
+  Future<void> updateAddress(String userId, String address);
+  Future<String?> loadProfilePhoto(String userId);
+  Stream<List<User>> fetchUsers();
 }
 
 final userRepositoryProvider =
@@ -80,6 +87,40 @@ class UserRepositoryImpl implements BaseUserRepository {
     }
   }
 
+ @override
+  Future<void> updateProfileUser(User user) async {
+    await _userDB.doc(user.id).update(user.toJson());
+  }
+
+  @override
+  Future<void> updateProfileDisplayName(String userId, String name) async {
+    await _userDB.doc(userId).update({'displayName': name});
+  }
+
+  @override
+  Future<void> updateEmail(String userId, String email) async {
+    await _userDB.doc(userId).update({'email': email});
+  }
+
+  @override
+  Future<void> updateAddress(String userId, String address) async {
+    await _userDB.doc(userId).update({'address': address});
+  }
+
+  @override
+  Future<String?> uploadProfilePhoto(File imageFile, String userId) async {
+    final ref = _storage.ref().child('profiles/$userId.jpg');
+    await ref.putFile(imageFile);
+    final downloadUrl = await ref.getDownloadURL();
+    await _userDB.doc(userId).update({'profile': downloadUrl});
+    return downloadUrl;
+  }
+
+  @override
+  Future<String?> loadProfilePhoto(String userId) async {
+    final doc = await _userDB.doc(userId).get();
+    return doc.data()?['profile'];
+  }
 
 @override
   Future<void> addUser(User user, String adminEmail, String adminPassword) async {
@@ -427,7 +468,6 @@ Future<void> deleteUserByAdmin(
     final currentUser = _auth.currentUser!;
     final authProviderType = currentUser.providerData.first.providerId;
     final providerList = user.providerData ?? [];
-    logger.e(user.providerData);
 
     final providerExists = providerList.any((provider) =>
         provider.providerType ==
@@ -448,6 +488,17 @@ Future<void> deleteUserByAdmin(
       );
       await _userDB.doc(user.id).set(updatedUser.toJson());
     }
+  }
+
+   @override
+  Stream<List<User>> fetchUsers() {
+    return _userDB
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => User.fromJson(doc.data())).toList(),
+        );
   }
 
 }

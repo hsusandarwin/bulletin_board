@@ -13,7 +13,6 @@ final authUserStreamProvider = StreamProvider.autoDispose<auth.User?>((ref) {
   return ref.watch(userRepositoryProvider).authUserStream().asyncMap((
     user,
   ) async {
-    logger.e('user --> $user');
     if (user != null && !user.emailVerified) {
       await user.reload();
       return auth.FirebaseAuth.instance.currentUser;
@@ -228,50 +227,55 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> deleteAccount({
-    required String? password,
-    required String profileUrl,
-  }) async {
-    try {
-      final currentUser = auth.FirebaseAuth.instance.currentUser;
-      if (currentUser == null) throw Exception("No user logged in");
+  String? password, // now nullable
+  required String profileUrl,
+}) async {
+  try {
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    if (currentUser == null) throw Exception("No user logged in");
 
-      final providerId = await CurrentProviderSetting().get() ?? '';
+    final providerId = await CurrentProviderSetting().get() ?? '';
 
-      if (profileUrl.isNotEmpty) {
-        await _userRepository.deleteFromStorage(profileUrl);
-      }
-      if (providerId.contains('password')) {
-        if (password == null || password.isEmpty) {
-          throw Exception("Password is required for reauthentication");
-        }
-        final credential = auth.EmailAuthProvider.credential(
-          email: currentUser.email!,
-          password: password,
-        );
-        await currentUser.reauthenticateWithCredential(credential);
-      } else if (providerId.contains('google')) {
-        final googleProvider = auth.GoogleAuthProvider();
-        await currentUser.reauthenticateWithProvider(googleProvider);
+    // Delete profile image from storage if it exists
+    if (profileUrl.isNotEmpty) {
+      await _userRepository.deleteFromStorage(profileUrl);
+    }
+
+    // Reauthentication depending on the provider
+    if (providerId.contains('password')) {
+      // Only require password for email/password accounts
+      if (password == null || password.isEmpty) {
+        throw Exception("Password is required for reauthentication");
       }
 
-      await _userRepository.deleteUser(currentUser.uid);
+      final credential = auth.EmailAuthProvider.credential(
+        email: currentUser.email!,
+        password: password,
+      );
+      await currentUser.reauthenticateWithCredential(credential);
+    } else if (providerId.contains('google')) {
+      final googleProvider = auth.GoogleAuthProvider();
+      await currentUser.reauthenticateWithProvider(googleProvider);
+    }
 
-      await currentUser.delete();
+    await _userRepository.deleteUser(currentUser.uid);
+    await currentUser.delete();
 
-      await _userRepository.signOut();
-    } on auth.FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        logger.e("Reauthentication required: ${e.message}");
-        throw Exception("Please log in again before deleting your account.");
-      } else {
-        logger.e("Auth Error: ${e.code} - ${e.message}");
-        rethrow;
-      }
-    } catch (e) {
-      logger.e("Delete Error: $e");
+    await _userRepository.signOut();
+
+  } on auth.FirebaseAuthException catch (e) {
+    if (e.code == 'requires-recent-login') {
+      logger.e("Reauthentication required: ${e.message}");
+      throw Exception("Please log in again before deleting your account.");
+    } else {
+      logger.e("Auth Error: ${e.code} - ${e.message}");
       rethrow;
     }
+  } catch (e) {
+    logger.e("Delete Error: $e");
+    rethrow;
   }
+}
 
   Future<void> getUserFuture({required String authUserId}) async {
     // Try to fetch the user from Firestore

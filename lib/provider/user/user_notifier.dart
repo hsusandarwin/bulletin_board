@@ -25,6 +25,11 @@ final userProviderStream = StreamProvider.family<User?,String>((ref, userId){
   return userRepository.getUserStream(userId: userId);
 });
 
+final fetchUsersProvider = StreamProvider<List<User>>((ref) {
+  final repo = ref.watch(userRepositoryProvider);
+  return repo.fetchUsers();
+});
+
 class UserNotifier extends StateNotifier<UserState> {
   UserNotifier(this.user, this.userRepository) : super(UserState());
 

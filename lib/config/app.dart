@@ -51,7 +51,6 @@ class MyApp extends HookConsumerWidget {
       home: authUserStream.when(
         data: (user) {
           if (user != null && user.emailVerified) {
-            // Fetch user data asynchronously using useEffect
             useEffect(() {
               Future<void> fetchUserData() async {
                 debugPrint('Fetching user data...');

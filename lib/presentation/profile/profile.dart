@@ -8,6 +8,7 @@ import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
+import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -45,18 +46,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _loadProfile();
   }
 
-  Future<void> _loadProfile() async {
-    final doc = await FirebaseFirestore.instance.collection('users').doc(_userId).get();
-    final data = doc.data();
-    if (data != null) {
-      setState(() {
-        _nameController.text = data['displayName'] ?? '';
-        _emailController.text = data['email'] ?? '';
-        _addressController.text = data['address'] ?? '';
-        _uploadedImageUrl = data['profile'];
-      });
-    }
+ Future<void> _loadProfile() async {
+  final repo = ref.read(userRepositoryProvider);
+  final appUser = await repo.getUserFuture(userId: _userId);
+
+  if (appUser != null) {
+    setState(() {
+      _nameController.text = appUser.name;
+      _emailController.text = appUser.email;
+      _addressController.text = appUser.address;
+      _uploadedImageUrl = appUser.profile;
+    });
   }
+}
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -68,55 +70,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> _uploadImage() async {
     if (_selectedImage == null) return;
-    final imageUrl = _selectedImage!.path;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .update({'profile': imageUrl});
-
+    final repo = ref.read(userRepositoryProvider);
+    final imageUrl = await repo.uploadProfilePhoto(_selectedImage!, _userId);
     setState(() => _uploadedImageUrl = imageUrl);
   }
 
   Future<void> _updateDisplayName() async {
+    final repo = ref.read(userRepositoryProvider);
     final newName = _nameController.text.trim();
     if (newName.isEmpty) return;
 
     await _currentUser.updateDisplayName(newName);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .update({'displayName': newName});
+    await repo.updateProfileDisplayName(_userId, newName);
 
     setState(() => _isEditingName = false);
   }
 
   Future<void> _updateEmail() async {
+    final repo = ref.read(userRepositoryProvider);
     final newEmail = _emailController.text.trim();
     if (newEmail.isEmpty) return;
 
     await _currentUser.sendEmailVerification();
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .update({'email': newEmail});
+    await repo.updateEmail(_userId, newEmail);
 
     setState(() => _isEditingEmail = false);
   }
 
   Future<void> _updateAddress() async {
+    final repo = ref.read(userRepositoryProvider);
     final newAddress = _addressController.text.trim();
     if (newAddress.isEmpty) return;
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_userId)
-        .update({'address': newAddress});
-
-    setState(()  => _isEditingAddress = false);
+    await repo.updateAddress(_userId, newAddress);
+    setState(() => _isEditingAddress = false);
   }
   
-
   Future<void> _changePasswordDialog() async {
     final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
@@ -224,7 +213,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         }
       }
     }
-  
 
   Widget _buildEditableRow({
     required IconData icon,
