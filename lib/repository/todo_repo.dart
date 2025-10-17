@@ -80,6 +80,7 @@ class TodoRepositoryImpl implements BaseTodoRepository {
         ),
       );
       imageUrl = response.secureUrl;
+      logger.i('add image --> $imageUrl');
     }
 
     final todo = Todo(
@@ -123,7 +124,6 @@ class TodoRepositoryImpl implements BaseTodoRepository {
           publicId: id,
         ),
       );
-      logger.f('image 1 --> $imageUrl');
       imageUrl = response.secureUrl;
       logger.f('image 2 --> $imageUrl');
     }
