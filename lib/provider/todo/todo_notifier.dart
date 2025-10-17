@@ -90,6 +90,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
     required BuildContext context,
   }) async {
     ref.read(loadingProvider.notifier).update((state) => true);
+    logger.e('image in provider --> $imageFile');
     try {
       final updatedTodo = await _repo.updateTodo(
         id: id,

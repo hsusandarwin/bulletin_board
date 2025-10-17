@@ -226,11 +226,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> signOut() async {
     await _userRepository.signOut();
+    CurrentProviderSetting().clear();
     state = state.copyWith(isLoading: false, errorMsg: 'Logout Success');
   }
 
   Future<void> deleteAccount({
-    String? password, // now nullable
+    String? password,
     required String profileUrl,
   }) async {
     try {

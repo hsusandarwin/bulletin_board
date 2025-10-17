@@ -123,8 +123,9 @@ class TodoRepositoryImpl implements BaseTodoRepository {
           publicId: id,
         ),
       );
+      logger.f('image 1 --> $imageUrl');
       imageUrl = response.secureUrl;
-      logger.f('image --> $imageUrl');
+      logger.f('image 2 --> $imageUrl');
     }
 
     final updatedData = {

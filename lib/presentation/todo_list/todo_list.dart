@@ -217,21 +217,35 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                     ),
                   ],
                 ),
+                SizedBox(
+                  width: 15,
+                ),
                 Expanded(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
-                    child:
-                        data.image != null && data.image.toString().isNotEmpty
-                        ? Image.network(
-                            data.image!,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.broken_image,
-                                  size: 60,
-                                  color: Colors.grey,
+                    child: data.image != null && data.image!.isNotEmpty
+                        ? FutureBuilder(
+                            future: precacheImage(NetworkImage(data.image!), context),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState != ConnectionState.done) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return Image.network(
+                                data.image!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const Center(
+                                  child: Icon(
+                                    Icons.broken_image,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
                                 ),
+                              );
+                            },
                           )
                         : Container(
                             color: Colors.grey[200],
@@ -395,29 +409,42 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(12),
                       ),
-                      child:
-                          todo.image != null && todo.image.toString().isNotEmpty
-                          ? Image.network(
-                              todo.image!,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.broken_image,
-                                    size: 60,
-                                    color: Colors.grey,
+                      child: Container(
+                          width: double.infinity,
+                          color: Colors.grey[200],
+                          child: todo.image != null && todo.image!.isNotEmpty
+                              ? FutureBuilder(
+                              future: precacheImage(NetworkImage(todo.image!), context),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState != ConnectionState.done) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Image.network(
+                                  todo.image!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      size: 60,
+                                      color: Colors.grey,
+                                    ),
                                   ),
+                                );
+                              },
                             )
-                          : Container(
-                              color: Colors.grey[200],
-                              child: const Center(
-                                child: Icon(
-                                  Icons.image,
-                                  size: 60,
-                                  color: Colors.grey,
-                                ),
+                        : Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 60,
+                                color: Colors.grey,
                               ),
                             ),
+                          ),
+                      )
                     ),
                   ),
                   if (currentUser != null &&

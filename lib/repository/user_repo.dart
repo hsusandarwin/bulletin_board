@@ -184,8 +184,7 @@ class UserRepositoryImpl implements BaseUserRepository {
     String adminPassword,
   ) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final docRef = firestore.collection('users').doc(userId);
+      final docRef = _userDB.doc(userId);
       final snapshot = await docRef.get();
 
       if (!snapshot.exists) throw Exception('User not found');

@@ -2,7 +2,6 @@ import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/provider/user/user_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
-import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final userNotifierProvider = StateNotifierProvider.autoDispose
@@ -61,7 +60,6 @@ class UserNotifier extends StateNotifier<UserState> {
           updatedAt: DateTime.now(),
         );
         await userRepository.saveUserToFirestore(user);
-        await CurrentProviderSetting().update(providerId: 'password');
       } else {
         if (user.password != password) {
           user = user.copyWith(password: password, updatedAt: DateTime.now());

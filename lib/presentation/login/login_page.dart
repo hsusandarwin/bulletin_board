@@ -14,6 +14,7 @@ import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/user/user_notifier.dart';
+import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
@@ -137,6 +138,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
                             password,
                           );
 
+                          await CurrentProviderSetting().update(providerId: 'password');
+
                           if (!isMounted()) return;
 
                           if (user != null) {
@@ -213,6 +216,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                         ref.read(loadingProvider.notifier).state = true;
                         try {
                           await notifier.loginWithGoogle();
+                          await CurrentProviderSetting().update(providerId: 'google.com');
 
                           final state = ref.read(authNotifierProvider);
 
