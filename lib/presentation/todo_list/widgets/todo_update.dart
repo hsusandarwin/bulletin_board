@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:io';
-import 'package:bulletin_board/config/logger.dart';
+
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
@@ -55,7 +55,6 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
     if (pickedFile != null) {
       setState(() => _selectedImage = File(pickedFile.path));
     }
-    logger.f('pick Image fun --> $_selectedImage');
   }
 
   // void _removeImage() {
@@ -97,7 +96,6 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return LoadingOverlay(
       child: Scaffold(
         appBar: AppBar(
@@ -229,25 +227,23 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () async {
-                                if (formKey.currentState!.validate()) {
-                                  final currentUser =
-                                      auth.FirebaseAuth.instance.currentUser;
+                          if (formKey.currentState!.validate()) {
+                            final currentUser =
+                                auth.FirebaseAuth.instance.currentUser;
 
-                                  await ref
-                                      .read(todoNotifierProvider.notifier)
-                                      .updateTodo(
-                                        id: widget.id,
-                                        title: _titlecontroller.text.trim(),
-                                        description: _despcontroller.text
-                                            .trim(),
-                                        isPublish: isPublishBool,
-                                        uid: currentUser?.uid ?? "unknown",
-                                        imageFile: _selectedImage,
-                                        context: context
-                                      );
-                                      logger.f('UI image --> $_selectedImage');
-                                }
-                              },
+                            await ref
+                                .read(todoNotifierProvider.notifier)
+                                .updateTodo(
+                                  id: widget.id,
+                                  title: _titlecontroller.text.trim(),
+                                  description: _despcontroller.text.trim(),
+                                  isPublish: isPublishBool,
+                                  uid: currentUser?.uid ?? "unknown",
+                                  imageFile: _selectedImage,
+                                  context: context,
+                                );
+                          }
+                        },
                         child: Text(
                           AppLocalizations.of(context)!.update,
                           style: TextStyle(fontSize: 20, color: Colors.white),

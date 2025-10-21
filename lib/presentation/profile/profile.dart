@@ -61,19 +61,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
+  Future<void> _uploadImage() async {
+    if (_selectedImage == null) return;
+    final repo = ref.read(userRepositoryProvider);
+    final imageUrl = await repo.uploadProfilePhoto(_selectedImage!, _userId);
+    setState(() => _uploadedImageUrl = imageUrl);
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
       setState(() => _selectedImage = File(pickedFile.path));
       await _uploadImage();
     }
-  }
-
-  Future<void> _uploadImage() async {
-    if (_selectedImage == null) return;
-    final repo = ref.read(userRepositoryProvider);
-    final imageUrl = await repo.uploadProfilePhoto(_selectedImage!, _userId);
-    setState(() => _uploadedImageUrl = imageUrl);
   }
 
   Future<void> _updateDisplayName() async {
@@ -310,23 +310,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               const SizedBox(height: 20),
               Stack(
                 children: [
-                  _uploadedImageUrl != null
-                      ? CircleAvatar(
-                          radius: 64,
-                          backgroundImage: File(_uploadedImageUrl!).existsSync()
-                              ? FileImage(File(_uploadedImageUrl!))
-                              : null,
-                          backgroundColor: Colors.grey[300],
-                        )
-                      : const CircleAvatar(
-                          radius: 64,
-                          backgroundColor: Colors.grey,
-                          child: Icon(
+                  CircleAvatar(
+                    radius: 64,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: _uploadedImageUrl != null
+                        ? (_uploadedImageUrl!.startsWith('http')
+                              ? NetworkImage(_uploadedImageUrl!)
+                              : FileImage(File(_uploadedImageUrl!))
+                                    as ImageProvider)
+                        : null,
+                    child: _uploadedImageUrl == null
+                        ? const Icon(
                             Icons.person,
                             size: 60,
                             color: Colors.white,
-                          ),
-                        ),
+                          )
+                        : null,
+                  ),
                   Positioned(
                     bottom: 0,
                     right: -10,

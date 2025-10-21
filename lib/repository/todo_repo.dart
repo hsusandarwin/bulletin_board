@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
@@ -116,16 +117,16 @@ class TodoRepositoryImpl implements BaseTodoRepository {
   }) async {
     String? imageUrl;
     if (imageFile != null && imageFile.existsSync()) {
+      final timestampId = '$id-${DateTime.now().millisecondsSinceEpoch}';
       final response = await _cloudinary.uploadFile(
         CloudinaryFile.fromFile(
           imageFile.path,
           resourceType: CloudinaryResourceType.Image,
           folder: "todo_images",
-          publicId: id,
+          publicId: timestampId,
         ),
       );
       imageUrl = response.secureUrl;
-      logger.f('image 2 --> $imageUrl');
     }
 
     final updatedData = {
@@ -133,10 +134,9 @@ class TodoRepositoryImpl implements BaseTodoRepository {
       'description': description,
       'isPublish': isPublish,
       'uid': uid,
-      'image': imageUrl,
+      if (imageUrl != null) 'image': imageUrl,
       'updatedAt': DateTime.now(),
     };
-    logger.f('update todo --> $updatedData');
 
     await _todoDB.doc(id).update(updatedData);
 

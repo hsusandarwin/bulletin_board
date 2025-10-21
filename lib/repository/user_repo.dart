@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
@@ -60,6 +61,11 @@ class UserRepositoryImpl implements BaseUserRepository {
   final _storage = FirebaseStorage.instance;
   final _userDB = FirebaseFirestore.instance.collection('users');
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  final _cloudinary = CloudinaryPublic(
+    'dkoddd9bd',
+    'test-preset',
+    cache: false,
+  );
 
   @override
   auth.User? get getCurrentUser => _auth.currentUser;
@@ -109,11 +115,26 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   Future<String?> uploadProfilePhoto(File imageFile, String userId) async {
-    final ref = _storage.ref().child('profiles/$userId.jpg');
-    await ref.putFile(imageFile);
-    final downloadUrl = await ref.getDownloadURL();
-    await _userDB.doc(userId).update({'profile': downloadUrl});
-    return downloadUrl;
+    try {
+      final timestampId = '$userId-${DateTime.now().millisecondsSinceEpoch}';
+      final response = await _cloudinary.uploadFile(
+        CloudinaryFile.fromFile(
+          imageFile.path,
+          folder: 'profiles',
+          publicId: timestampId,
+          resourceType: CloudinaryResourceType.Image,
+        ),
+      );
+
+      final newUrl = response.secureUrl;
+      await _userDB.doc(userId).update({'profile': newUrl});
+
+      logger.i('✅ Profile photo updated for $userId');
+      return newUrl;
+    } catch (e) {
+      logger.e('❌ Error uploading to Cloudinary: $e');
+      return null;
+    }
   }
 
   @override
