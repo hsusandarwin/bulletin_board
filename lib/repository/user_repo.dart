@@ -199,49 +199,47 @@ class UserRepositoryImpl implements BaseUserRepository {
   }
 
   @override
-  Future<void> deleteUserByAdmin(
-    String userId,
-    String adminEmail,
-    String adminPassword,
-  ) async {
-    try {
-      final docRef = _userDB.doc(userId);
-      final snapshot = await docRef.get();
+Future<void> deleteUserByAdmin(
+  String userId,
+  String adminEmail,
+  String adminPassword,
+) async {
+  try {
+    final docRef = _userDB.doc(userId);
 
-      if (!snapshot.exists) throw Exception('User not found');
+    final snapshot = await docRef.get();
 
-      final data = snapshot.data();
-      final userEmail = data?['email'] as String?;
-      final userPassword = data?['password'] as String?;
-
-      if (userEmail == null || userPassword == null) {
-        throw Exception('User email or password missing in database');
-      }
-
-      final authInstance = auth.FirebaseAuth.instance;
-      final admin = authInstance.currentUser;
-      if (admin == null) throw Exception('Admin not logged in');
-      await authInstance.signOut();
-      final userCredential = await authInstance.signInWithEmailAndPassword(
-        email: userEmail,
-        password: userPassword,
-      );
-      await userCredential.user?.delete();
-      await docRef.delete();
-      await authInstance.signInWithEmailAndPassword(
-        email: adminEmail,
-        password: adminPassword,
-      );
-
-      logger.i('User $userId deleted successfully by admin $adminEmail');
-    } on auth.FirebaseAuthException catch (e) {
-      logger.e('Firebase Auth Exception while deleting user: $e');
-      throw Exception('FirebaseAuth error: ${e.message}');
-    } catch (e, st) {
-      logger.e('Error deleting user: $e', error: e, stackTrace: st);
-      throw Exception('Failed to delete user: $e');
+    if (!snapshot.exists) {
+      throw Exception('User not found'); 
     }
+
+    final data = snapshot.data();
+    final userEmail = data?['email'] as String?;
+
+    if (userEmail == null || userEmail.isEmpty) {
+      throw Exception('User email missing in database');
+    }
+
+    final todosSnap = await FirebaseFirestore.instance
+        .collection('todos')
+        .where('uid', isEqualTo: userId)
+        .get();
+
+    for (final doc in todosSnap.docs) {
+      await doc.reference.delete();
+    }
+
+    await docRef.delete();
+    
+    logger.i('User $userId data deleted successfully by admin $adminEmail');
+  } on auth.FirebaseAuthException catch (e) {
+    logger.e('Firebase Auth Exception while deleting user: $e');
+    throw Exception('FirebaseAuth error: ${e.message}');
+  } catch (e, st) {
+    logger.e('Error deleting user: $e', error: e, stackTrace: st);
+    throw Exception('Failed to delete user: $e');
   }
+}
 
   @override
   Future<void> updateUser(User user) async {

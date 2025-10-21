@@ -1,3 +1,4 @@
+import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_add.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_update.dart';
@@ -207,8 +208,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                   ref.read(loadingProvider.notifier).state =
                                       true;
                                   try {
-                                    final currentUser =
-                                        FirebaseAuth.instance.currentUser;
+                                    final currentUser = FirebaseAuth.instance.currentUser;
                                     if (currentUser == null) {
                                       throw Exception("Admin is not logged in");
                                     }
@@ -218,26 +218,22 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                       throw Exception("Admin email missing");
                                     }
 
-                                    final adminPassword =
-                                        await showAdminPasswordDialog(context);
+                                    final adminPassword = await showAdminPasswordDialog(context);
                                     if (adminPassword == null) return;
 
-                                    final userRepository = ref.read(
-                                      userRepositoryProvider,
-                                    );
+                                    final userRepository = ref.read(userRepositoryProvider);
                                     final userId = user.id;
+                                    logger.i('select user id --> $userId');
 
                                     await userRepository.deleteUserByAdmin(
                                       userId,
                                       adminEmail,
                                       adminPassword,
                                     );
-                                    await todoListStateNotifier
-                                        .deleteTodoByUser(userId);
+                                    await todoListStateNotifier.deleteTodoByUser(userId);
 
                                     if (context.mounted &&
                                         Navigator.canPop(context)) {
-                                      Navigator.pop(context);
                                       showSnackBar(
                                         context,
                                         AppLocalizations.of(
@@ -255,8 +251,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                     );
                                   } finally {
                                     if (context.mounted) {
-                                      ref.read(loadingProvider.notifier).state =
-                                          false;
+                                      ref.read(loadingProvider.notifier).state = false;
                                     }
                                   }
                                 },

@@ -5,7 +5,6 @@ import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
-import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
@@ -40,6 +39,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   User get _currentUser => FirebaseAuth.instance.currentUser!;
   String get _userId => _currentUser.uid;
+
+   String insertLineBreaks(String text, {int limit = 23}) {
+    final buffer = StringBuffer();
+    int count = 0;
+    for (var char in text.characters) {
+      buffer.write(char);
+      count++;
+      if (count >= limit) {
+        buffer.write('\n');
+        count = 0;
+      }
+    }
+    return buffer.toString();
+  }
 
   @override
   void initState() {
@@ -258,7 +271,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Icon(icon),
                   const SizedBox(width: 8),
                   Text(
-                    isPassword ? '********' : value,
+                    insertLineBreaks(
+                    isPassword ? '********' : value),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -295,182 +309,180 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingOverlay(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            AppLocalizations.of(context)!.profile,
-            textAlign: TextAlign.start,
-            style: TextStyle(fontSize: 20),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.profile,
+          textAlign: TextAlign.start,
+          style: TextStyle(fontSize: 20),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 64,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: _uploadedImageUrl != null
-                        ? (_uploadedImageUrl!.startsWith('http')
-                              ? NetworkImage(_uploadedImageUrl!)
-                              : FileImage(File(_uploadedImageUrl!))
-                                    as ImageProvider)
-                        : null,
-                    child: _uploadedImageUrl == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 60,
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: -10,
-                    child: IconButton(
-                      icon: const Icon(Icons.camera_alt, size: 30),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(
-                              AppLocalizations.of(context)!.selectImageSource,
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _pickImage(ImageSource.gallery);
-                                },
-                                child: Text(
-                                  AppLocalizations.of(context)!.gallery,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _pickImage(ImageSource.camera);
-                                },
-                                child: Text(
-                                  AppLocalizations.of(context)!.camera,
-                                ),
-                              ),
-                            ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 64,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: _uploadedImageUrl != null
+                      ? (_uploadedImageUrl!.startsWith('http')
+                            ? NetworkImage(_uploadedImageUrl!)
+                            : FileImage(File(_uploadedImageUrl!))
+                                  as ImageProvider)
+                      : null,
+                  child: _uploadedImageUrl == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: -10,
+                  child: IconButton(
+                    icon: const Icon(Icons.camera_alt, size: 30),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(
+                            AppLocalizations.of(context)!.selectImageSource,
                           ),
-                        );
-                      },
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _pickImage(ImageSource.gallery);
+                              },
+                              child: Text(
+                                AppLocalizations.of(context)!.gallery,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _pickImage(ImageSource.camera);
+                              },
+                              child: Text(
+                                AppLocalizations.of(context)!.camera,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildEditableRow(
+              icon: Icons.person,
+              value: _nameController.text,
+              isEditing: _isEditingName,
+              controller: _nameController,
+              onSave: _updateDisplayName,
+              onCancel: () {
+                setState(() {
+                  _isEditingName = false;
+                  _nameController.text = _currentUser.displayName ?? '';
+                });
+              },
+              onEdit: () => setState(() => _isEditingName = true),
+            ),
+            const SizedBox(height: 20),
+            _buildEditableRow(
+              icon: Icons.email,
+              value: _emailController.text,
+              isEditing: _isEditingEmail,
+              controller: _emailController,
+              onSave: _updateEmail,
+              onCancel: () {
+                setState(() {
+                  _isEditingEmail = false;
+                  _emailController.text = _currentUser.email ?? '';
+                });
+              },
+              onEdit: () => setState(() => _isEditingEmail = true),
+            ),
+            const SizedBox(height: 20),
+            _buildEditableRow(
+              icon: Icons.home,
+              value: _addressController.text,
+              isEditing: _isEditingAddress,
+              controller: _addressController,
+              onSave: _updateAddress,
+              onCancel: () {
+                setState(() {
+                  _isEditingAddress = false;
+                });
+              },
+              onEdit: () => setState(() => _isEditingAddress = true),
+            ),
+            const SizedBox(height: 20),
+            _buildEditableRow(
+              icon: Icons.lock,
+              value: '********',
+              isEditing: false,
+              controller: TextEditingController(),
+              onSave: () {},
+              onCancel: () {},
+              onEdit: () {},
+              isPassword: true,
+              onPasswordEdit: _changePasswordDialog,
+            ),
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.joined,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(width: 3),
+                  Icon(Icons.calendar_today),
+                  Text(
+                    DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(_currentUser.metadata.creationTime!),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              _buildEditableRow(
-                icon: Icons.person,
-                value: _nameController.text,
-                isEditing: _isEditingName,
-                controller: _nameController,
-                onSave: _updateDisplayName,
-                onCancel: () {
-                  setState(() {
-                    _isEditingName = false;
-                    _nameController.text = _currentUser.displayName ?? '';
-                  });
-                },
-                onEdit: () => setState(() => _isEditingName = true),
+            ),
+            const SizedBox(height: 40),
+            TextButton.icon(
+              onPressed: () {
+                showConfirmationDialog(
+                  context: context,
+                  title: AppLocalizations.of(context)!.confirmLogout,
+                  confirmText: AppLocalizations.of(context)!.logout,
+                  confirmIcon: Icons.logout,
+                  confirmColor: Colors.red,
+                  onConfirm: () {
+                    logOut();
+                  },
+                );
+              },
+              icon: const Icon(Icons.logout_rounded, color: Colors.red),
+              label: Text(
+                AppLocalizations.of(context)!.logout,
+                style: TextStyle(color: Colors.red, fontSize: 18),
               ),
-              const SizedBox(height: 20),
-              _buildEditableRow(
-                icon: Icons.email,
-                value: _emailController.text,
-                isEditing: _isEditingEmail,
-                controller: _emailController,
-                onSave: _updateEmail,
-                onCancel: () {
-                  setState(() {
-                    _isEditingEmail = false;
-                    _emailController.text = _currentUser.email ?? '';
-                  });
-                },
-                onEdit: () => setState(() => _isEditingEmail = true),
-              ),
-              const SizedBox(height: 20),
-              _buildEditableRow(
-                icon: Icons.home,
-                value: _addressController.text,
-                isEditing: _isEditingAddress,
-                controller: _addressController,
-                onSave: _updateAddress,
-                onCancel: () {
-                  setState(() {
-                    _isEditingAddress = false;
-                  });
-                },
-                onEdit: () => setState(() => _isEditingAddress = true),
-              ),
-              const SizedBox(height: 20),
-              _buildEditableRow(
-                icon: Icons.lock,
-                value: '********',
-                isEditing: false,
-                controller: TextEditingController(),
-                onSave: () {},
-                onCancel: () {},
-                onEdit: () {},
-                isPassword: true,
-                onPasswordEdit: _changePasswordDialog,
-              ),
-              const SizedBox(height: 40),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 1),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.joined,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 3),
-                    Icon(Icons.calendar_today),
-                    Text(
-                      DateFormat(
-                        'dd/MM/yyyy',
-                      ).format(_currentUser.metadata.creationTime!),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-              TextButton.icon(
-                onPressed: () {
-                  showConfirmationDialog(
-                    context: context,
-                    title: AppLocalizations.of(context)!.confirmLogout,
-                    confirmText: AppLocalizations.of(context)!.logout,
-                    confirmIcon: Icons.logout,
-                    confirmColor: Colors.red,
-                    onConfirm: () {
-                      logOut();
-                    },
-                  );
-                },
-                icon: const Icon(Icons.logout_rounded, color: Colors.red),
-                label: Text(
-                  AppLocalizations.of(context)!.logout,
-                  style: TextStyle(color: Colors.red, fontSize: 18),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
