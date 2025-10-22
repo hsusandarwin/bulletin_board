@@ -55,7 +55,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
       final name = user.name.toLowerCase();
       final email = user.email.toLowerCase();
       final address = user.address.toLowerCase();
-      final role = (user.role == true ? 'admin' : 'user').toLowerCase();
+      final role = (user.role == UserRole.admin ? 'admin' : 'user').toLowerCase();
 
       final combined = "$name $email $address $role";
       return combined.contains(searchQuery.toLowerCase());

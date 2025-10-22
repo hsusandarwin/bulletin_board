@@ -134,7 +134,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   ),
                                   child: Text(
                                     description,
-                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 12),
                                   ),

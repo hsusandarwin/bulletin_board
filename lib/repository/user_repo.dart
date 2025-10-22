@@ -518,12 +518,16 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   Stream<List<User>> fetchUsers() {
+    final currentUserId = auth.FirebaseAuth.instance.currentUser?.uid;
+
     return _userDB
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => User.fromJson(doc.data())).toList(),
+          (snapshot) => snapshot.docs
+              .map((doc) => User.fromJson(doc.data()))
+              .where((user) => user.id != currentUserId)
+              .toList(),
         );
   }
 }

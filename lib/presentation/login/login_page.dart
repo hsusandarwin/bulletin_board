@@ -2,6 +2,7 @@
 
 import 'package:bulletin_board/config/app.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/admin_home/admin_home.dart';
 import 'package:bulletin_board/presentation/forget_password/forget_password.dart';
@@ -138,7 +139,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
                             password,
                           );
 
-                          await CurrentProviderSetting().update(providerId: 'password');
+                          await CurrentProviderSetting().update(
+                            providerId: 'password',
+                          );
 
                           if (!isMounted()) return;
 
@@ -210,48 +213,53 @@ class LoginPageState extends ConsumerState<LoginPage> {
                     Image.asset('assets/login/OR.png'),
                     TextButton.icon(
                       onPressed: () async {
-                        final notifier = ref.read(
-                          authNotifierProvider.notifier,
-                        );
-                        ref.read(loadingProvider.notifier).state = true;
-                        try {
-                          await notifier.loginWithGoogle();
-                          await CurrentProviderSetting().update(providerId: 'google.com');
+                        if (!mounted) return;
+                        ref
+                            .read(loadingProvider.notifier)
+                            .update((state) => true);
 
+                        try {
+                          final notifier = ref.read(
+                            authNotifierProvider.notifier,
+                          );
+                          await notifier.loginWithGoogle();
+                          await CurrentProviderSetting().update(
+                            providerId: 'google.com',
+                          );
+
+                          if (!mounted) return;
                           final state = ref.read(authNotifierProvider);
 
                           if (state.isSuccess && state.user != null) {
                             showSnackBar(
                               context,
-                              "${AppLocalizations.of(context)!.welcome} ${state.user!.name}",
+                              "Welcome ${state.user!.name}",
                               Colors.green,
                             );
-                            if (state.user!.role == false) {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (_) => const UserHomePage(),
-                                ),
-                              );
-                            } else {
-                              Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                  builder: (_) => const AdminHomePage(),
-                                ),
-                              );
-                            }
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    state.user!.role == UserRole.admin
+                                    ? const AdminHomePage()
+                                    : const UserHomePage(),
+                              ),
+                            );
                           } else if (state.errorMsg.isNotEmpty) {
                             showSnackBar(context, state.errorMsg, Colors.red);
                           }
                         } catch (e) {
-                          if (context.mounted) {
+                          if (mounted) {
                             showSnackBar(context, e.toString(), Colors.red);
                           }
                         } finally {
-                          ref
-                              .read(loadingProvider.notifier)
-                              .update((state) => false);
+                          if (mounted) {
+                            ref
+                                .read(loadingProvider.notifier)
+                                .update((state) => false);
+                          }
                         }
                       },
+
                       icon: FaIcon(
                         FontAwesomeIcons.google,
                         color: Colors.red,

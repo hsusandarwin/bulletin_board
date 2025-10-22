@@ -5,6 +5,7 @@ import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/profile/profile.dart';
 import 'package:bulletin_board/presentation/todo_list/widgets/todo_update.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
+import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
 import 'package:bulletin_board/provider/user/user_notifier.dart';
@@ -38,6 +39,31 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
     return buffer.toString();
   }
 
+  Future<void> logOut() async {
+      try {
+        final authNotifier = ref.watch(authNotifierProvider.notifier);
+        await authNotifier.signOut();
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          showSnackBar(context, 'Logout failed: ${e.toString()}', Colors.red);
+        }
+      }
+    }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(loadingProvider.notifier).update((state) => false);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final todosAsync = ref.watch(publishedTodosProvider);
@@ -55,9 +81,9 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
 
     final userAsync = ref.watch(userProviderStream(currentUid));
     final user = userAsync.when(
-      data: (data) => data, // List<Todo>
-      error: (e, stack) => null, // return empty list or handle error
-      loading: () => null, // return empty list or placeholder
+      data: (data) => data,
+      error: (e, stack) => null,
+      loading: () => null, 
     );
 
     if (user == null) {
@@ -100,10 +126,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                       confirmIcon: Icons.logout,
                       confirmColor: Colors.red,
                       onConfirm: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                        );
+                        logOut();
                       },
                     );
                   },
@@ -165,102 +188,108 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    FutureBuilder<String>(
-                      future: ref
-                          .read(userRepositoryProvider)
-                          .getUserName(data.uid),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text(".....");
-                        }
-                        return Text(
-                          snapshot.data ?? "Unknown",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF3B6FAB),
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      insertLineBreaks(data.title),
-                      softWrap: true,
-                      maxLines: 2,
-                      overflow: TextOverflow.visible,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      insertLineBreaks(data.description),
-                      softWrap: true,
-                      maxLines: 2,
-                      overflow: TextOverflow.visible,
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
+            child: SizedBox(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
                       children: [
-                        Icon(Icons.thumb_up),
-                        SizedBox(width: 5),
-                        Text("${data.likesCount}"),
+                        FutureBuilder<String>(
+                          future: ref
+                              .read(userRepositoryProvider)
+                              .getUserName(data.uid),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text(".....");
+                            }
+                            return Text(
+                              snapshot.data ?? "Unknown",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF3B6FAB),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          data.title,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          data.description,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.thumb_up),
+                            SizedBox(width: 5),
+                            Text("${data.likesCount}"),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
-                SizedBox(
-                  width: 15,
-                ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                    child: data.image != null && data.image!.isNotEmpty
-                        ? FutureBuilder(
-                            future: precacheImage(NetworkImage(data.image!), context),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState != ConnectionState.done) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
+                  ),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                      child: data.image != null && data.image!.isNotEmpty
+                          ? FutureBuilder(
+                              future: precacheImage(
+                                NetworkImage(data.image!),
+                                context,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState !=
+                                    ConnectionState.done) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Image.network(
+                                  data.image!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Center(
+                                        child: Icon(
+                                          Icons.broken_image,
+                                          size: 60,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
                                 );
-                              }
-                              return Image.network(
-                                data.image!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Center(
-                                  child: Icon(
-                                    Icons.broken_image,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  ),
+                              },
+                            )
+                          : Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 60,
+                                  color: Colors.grey,
                                 ),
-                              );
-                            },
-                          )
-                        : Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 60,
-                                color: Colors.grey,
                               ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }).toList(),
@@ -411,41 +440,47 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
                         top: Radius.circular(12),
                       ),
                       child: Container(
-                          width: double.infinity,
-                          color: Colors.grey[200],
-                          child: todo.image != null && todo.image!.isNotEmpty
-                              ? FutureBuilder(
-                              future: precacheImage(NetworkImage(todo.image!), context),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState != ConnectionState.done) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
+                        width: double.infinity,
+                        color: Colors.grey[200],
+                        child: todo.image != null && todo.image!.isNotEmpty
+                            ? FutureBuilder(
+                                future: precacheImage(
+                                  NetworkImage(todo.image!),
+                                  context,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState !=
+                                      ConnectionState.done) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return Image.network(
+                                    todo.image!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Center(
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                size: 60,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                   );
-                                }
-                                return Image.network(
-                                  todo.image!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 60,
-                                      color: Colors.grey,
-                                    ),
+                                },
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 60,
+                                    color: Colors.grey,
                                   ),
-                                );
-                              },
-                            )
-                        : Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 60,
-                                color: Colors.grey,
+                                ),
                               ),
-                            ),
-                          ),
-                      )
+                      ),
                     ),
                   ),
                   if (currentUser != null &&

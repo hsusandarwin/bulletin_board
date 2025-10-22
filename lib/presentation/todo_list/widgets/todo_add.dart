@@ -41,7 +41,6 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return LoadingOverlay(
       child: Scaffold(
         appBar: AppBar(
@@ -169,29 +168,33 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () async {
-                           ref.read(loadingProvider.notifier).update((state) => true);
-                                try{
-                                  if (formKey.currentState!.validate()) {
-                                  final currentUser = auth.FirebaseAuth.instance.currentUser;
-                                  
-                                  await ref
-                                      .read(todoNotifierProvider.notifier)
-                                      .addTodo(
-                                        title: _titlecontroller.text.trim(),
-                                        description: _despcontroller.text
-                                            .trim(),
-                                        isPublish: isPublishBool,
-                                        uid: currentUser?.uid ?? "unknown",
-                                        imageFile: _selectedImage,
-                                        context: context,
-                                      );
-                                }
-                                } catch(e) {
-                                  logger.e('Error : $e');
-                                } finally {
-                                    ref.read(loadingProvider.notifier).update((state) => false);
-                                }
-                              },
+                          ref
+                              .read(loadingProvider.notifier)
+                              .update((state) => true);
+                          try {
+                            if (formKey.currentState!.validate()) {
+                              final currentUser =
+                                  auth.FirebaseAuth.instance.currentUser;
+
+                              await ref
+                                  .read(todoNotifierProvider.notifier)
+                                  .addTodo(
+                                    title: _titlecontroller.text.trim(),
+                                    description: _despcontroller.text.trim(),
+                                    isPublish: isPublishBool,
+                                    uid: currentUser?.uid ?? "unknown",
+                                    imageFile: _selectedImage,
+                                    context: context,
+                                  );
+                            }
+                          } catch (e) {
+                            logger.e('Error : $e');
+                          } finally {
+                            ref
+                                .read(loadingProvider.notifier)
+                                .update((state) => false);
+                          }
+                        },
                         child: Text(
                           AppLocalizations.of(context)!.add,
                           style: const TextStyle(
