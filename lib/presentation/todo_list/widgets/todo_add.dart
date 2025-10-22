@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
+import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../config/logger.dart';
 
 class ToDoAddPage extends StatefulHookConsumerWidget {
   const ToDoAddPage({super.key});
@@ -166,10 +169,11 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () async {
-                                if (formKey.currentState!.validate()) {
-                                  final currentUser =
-                                      auth.FirebaseAuth.instance.currentUser;
-
+                           ref.read(loadingProvider.notifier).update((state) => true);
+                                try{
+                                  if (formKey.currentState!.validate()) {
+                                  final currentUser = auth.FirebaseAuth.instance.currentUser;
+                                  
                                   await ref
                                       .read(todoNotifierProvider.notifier)
                                       .addTodo(
@@ -181,6 +185,11 @@ class _ToDoAddPageState extends ConsumerState<ToDoAddPage> {
                                         imageFile: _selectedImage,
                                         context: context,
                                       );
+                                }
+                                } catch(e) {
+                                  logger.e('Error : $e');
+                                } finally {
+                                    ref.read(loadingProvider.notifier).update((state) => false);
                                 }
                               },
                         child: Text(

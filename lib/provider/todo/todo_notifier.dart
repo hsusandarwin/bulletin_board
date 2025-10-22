@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
-import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/repository/todo_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -53,7 +52,6 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
     File? imageFile,
     required BuildContext context,
   }) async {
-    ref.read(loadingProvider.notifier).state = true;
     try {
       final todo = await _repo.addTodo(
         title: title,
@@ -75,8 +73,6 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
       }
     } catch (e) {
       if (context.mounted) showSnackBar(context, e.toString(), Colors.red);
-    } finally {
-      ref.read(loadingProvider.notifier).state = false;
     }
   }
 
@@ -89,7 +85,6 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
     File? imageFile,
     required BuildContext context,
   }) async {
-    ref.read(loadingProvider.notifier).update((state) => true);
     try {
       final updatedTodo = await _repo.updateTodo(
         id: id,
@@ -121,9 +116,7 @@ class TodoNotifier extends StateNotifier<List<Todo>> {
           Colors.red,
         );
       }
-    } finally {
-      ref.read(loadingProvider.notifier).update((state) => false);
-    }
+    } 
   }
 
   Future<void> deleteTodo(String todoId) async {

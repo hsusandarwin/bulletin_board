@@ -6,12 +6,15 @@ import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
 import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
+import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../config/logger.dart';
 
 class ToDoUpdatePage extends StatefulHookConsumerWidget {
   final String id;
@@ -227,7 +230,9 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                           backgroundColor: Colors.green,
                         ),
                         onPressed: () async {
-                          if (formKey.currentState!.validate()) {
+                          ref.read(loadingProvider.notifier).update((state) => true);
+                          try{
+                            if (formKey.currentState!.validate()) {
                             final currentUser =
                                 auth.FirebaseAuth.instance.currentUser;
 
@@ -242,6 +247,11 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                                   imageFile: _selectedImage,
                                   context: context,
                                 );
+                          }
+                          } catch(e) {
+                            logger.e('Error : $e');
+                          } finally {
+                              ref.read(loadingProvider.notifier).update((state) => false);
                           }
                         },
                         child: Text(

@@ -166,7 +166,7 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                         ),
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            ref.read(loadingProvider.notifier).state = true;
+                            ref.read(loadingProvider.notifier).update((state) => true);
 
                             try {
                               final adminEmail =
@@ -207,8 +207,7 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                               }
                             } finally {
                               if (context.mounted) {
-                                ref.read(loadingProvider.notifier).state =
-                                    false;
+                                ref.read(loadingProvider.notifier).update((state) => false);
                               }
                             }
                           }
