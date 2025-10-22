@@ -11,7 +11,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   name: json['displayName'] as String,
   email: json['email'] as String,
   password: json['password'] as String,
-  role: json['role'] as bool,
+  role: $enumDecode(_$UserRoleEnumMap, json['role']),
   address: json['address'] as String,
   profile: json['profile'] as String?,
   providerData: (json['providerData'] as List<dynamic>?)
@@ -26,7 +26,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'displayName': instance.name,
   'email': instance.email,
   'password': instance.password,
-  'role': instance.role,
+  'role': _$UserRoleEnumMap[instance.role]!,
   'address': instance.address,
   'profile': instance.profile,
   'providerData': instance.providerData
@@ -35,3 +35,5 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'createdAt': const TimestampConverter().toJson(instance.createdAt),
   'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
 };
+
+const _$UserRoleEnumMap = {UserRole.admin: 'admin', UserRole.user: 'user'};

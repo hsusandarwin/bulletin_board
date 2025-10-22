@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
 
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/l10n/l10n.dart';
 import 'package:bulletin_board/presentation/admin_home/admin_home.dart';
@@ -68,14 +69,17 @@ class MyApp extends HookConsumerWidget {
               return const Center(child: CircularProgressIndicator());
             }
             final currentUser = authStateNotifier.state.user;
-            if (currentUser != null && currentUser.role) {
-              return const AdminHomePage();
-            } else {
-              return const UserHomePage();
+            if (currentUser != null) {
+              if (currentUser.role == UserRole.admin) {
+                return const AdminHomePage();
+              } else {
+                return const UserHomePage();
+              }
             }
           } else {
             return const LoginPage();
           }
+          return null;
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) =>

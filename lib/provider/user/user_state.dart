@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_state.freezed.dart';
@@ -12,7 +13,7 @@ abstract class UserState with _$UserState{
     @Default('') String email,
     @Default('') String password,
     @Default('') String? profile,
-    @Default(false) bool role,
+    @Default(UserRole.user) UserRole role,
     @Default('') String address,
     DateTime? createdAt,
     DateTime? updatedAt,

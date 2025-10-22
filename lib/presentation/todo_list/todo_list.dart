@@ -1,4 +1,5 @@
 import 'package:bulletin_board/data/entities/todo/todo.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/profile/profile.dart';
@@ -64,7 +65,7 @@ class _ToDoListPageState extends ConsumerState<ToDoListPage> {
     }
 
     final currentUser = FirebaseAuth.instance.currentUser;
-    final isAdmin = user.role;
+    final isAdmin = user.role == UserRole.admin;
 
     return Scaffold(
       appBar: AppBar(

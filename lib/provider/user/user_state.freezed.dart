@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserState {
 
- String? get id; String get name; String get email; String get password; String? get profile; bool get role; String get address; DateTime? get createdAt; DateTime? get updatedAt; Uint8List? get imageData;
+ String? get id; String get name; String get email; String get password; String? get profile; UserRole get role; String get address; DateTime? get createdAt; DateTime? get updatedAt; Uint8List? get imageData;
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $UserStateCopyWith<$Res>  {
   factory $UserStateCopyWith(UserState value, $Res Function(UserState) _then) = _$UserStateCopyWithImpl;
 @useResult
 $Res call({
- String? id, String name, String email, String password, String? profile, bool role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
+ String? id, String name, String email, String password, String? profile, UserRole role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
 });
 
 
@@ -70,7 +70,7 @@ as String,email: null == email ? _self.email : email // ignore: cast_nullable_to
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageData: freezed == imageData ? _self.imageData : imageData // ignore: cast_nullable_to_non_nullable
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  bool role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  bool role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)  $default,) {final _that = this;
 switch (_that) {
 case _UserState():
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  String email,  String password,  String? profile,  bool role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -215,7 +215,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 
 
 class _UserState implements UserState {
-  const _UserState({this.id = '', this.name = '', this.email = '', this.password = '', this.profile = '', this.role = false, this.address = '', this.createdAt, this.updatedAt, this.imageData});
+  const _UserState({this.id = '', this.name = '', this.email = '', this.password = '', this.profile = '', this.role = UserRole.user, this.address = '', this.createdAt, this.updatedAt, this.imageData});
   
 
 @override@JsonKey() final  String? id;
@@ -223,7 +223,7 @@ class _UserState implements UserState {
 @override@JsonKey() final  String email;
 @override@JsonKey() final  String password;
 @override@JsonKey() final  String? profile;
-@override@JsonKey() final  bool role;
+@override@JsonKey() final  UserRole role;
 @override@JsonKey() final  String address;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
@@ -259,7 +259,7 @@ abstract mixin class _$UserStateCopyWith<$Res> implements $UserStateCopyWith<$Re
   factory _$UserStateCopyWith(_UserState value, $Res Function(_UserState) _then) = __$UserStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String name, String email, String password, String? profile, bool role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
+ String? id, String name, String email, String password, String? profile, UserRole role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
 });
 
 
@@ -284,7 +284,7 @@ as String,email: null == email ? _self.email : email // ignore: cast_nullable_to
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageData: freezed == imageData ? _self.imageData : imageData // ignore: cast_nullable_to_non_nullable

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -34,7 +35,6 @@ abstract class BaseUserRepository {
   Future<void> signOut();
   Future<void> create(String authUserId);
   Future<void> updateProvider(User user);
-  String get generateNewId;
   Future<auth.UserCredential> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -69,9 +69,6 @@ class UserRepositoryImpl implements BaseUserRepository {
 
   @override
   auth.User? get getCurrentUser => _auth.currentUser;
-
-  @override
-  String get generateNewId => _userDB.doc().id;
 
   @override
   Stream<User?> getUserStream({required String userId}) {
@@ -155,11 +152,16 @@ class UserRepositoryImpl implements BaseUserRepository {
             email: user.email,
             password: user.password,
           );
+
       await userCredential.user?.updateDisplayName(user.name);
+
+      final uid = userCredential.user!.uid;
+
+      final userWithId = user.copyWith(id: uid);
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(userCredential.user!.uid)
-          .set(user.toJson());
+          .doc(uid)
+          .set(userWithId.toJson());
       await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
         email: adminEmail,
         password: adminPassword,
@@ -199,47 +201,39 @@ class UserRepositoryImpl implements BaseUserRepository {
   }
 
   @override
-Future<void> deleteUserByAdmin(
-  String userId,
-  String adminEmail,
-  String adminPassword,
-) async {
-  try {
-    final docRef = _userDB.doc(userId);
-
-    final snapshot = await docRef.get();
-
-    if (!snapshot.exists) {
-      throw Exception('User not found'); 
+  Future<void> deleteUserByAdmin(
+    String userId,
+    String adminEmail,
+    String adminPassword,
+  ) async {
+    try {
+      final docRef = _userDB.doc(userId);
+      final snapshot = await docRef.get();
+      if (!snapshot.exists) {
+        throw Exception('User not found');
+      }
+      final data = snapshot.data();
+      final userEmail = data?['email'] as String?;
+      if (userEmail == null || userEmail.isEmpty) {
+        throw Exception('User email missing in database');
+      }
+      final todosSnap = await FirebaseFirestore.instance
+          .collection('todos')
+          .where('uid', isEqualTo: userId)
+          .get();
+      for (final doc in todosSnap.docs) {
+        await doc.reference.delete();
+      }
+      await docRef.delete();
+      logger.i('User $userId data deleted successfully by admin $adminEmail');
+    } on auth.FirebaseAuthException catch (e) {
+      logger.e('Firebase Auth Exception while deleting user: $e');
+      throw Exception('FirebaseAuth error: ${e.message}');
+    } catch (e, st) {
+      logger.e('Error deleting user: $e', error: e, stackTrace: st);
+      throw Exception('Failed to delete user: $e');
     }
-
-    final data = snapshot.data();
-    final userEmail = data?['email'] as String?;
-
-    if (userEmail == null || userEmail.isEmpty) {
-      throw Exception('User email missing in database');
-    }
-
-    final todosSnap = await FirebaseFirestore.instance
-        .collection('todos')
-        .where('uid', isEqualTo: userId)
-        .get();
-
-    for (final doc in todosSnap.docs) {
-      await doc.reference.delete();
-    }
-
-    await docRef.delete();
-    
-    logger.i('User $userId data deleted successfully by admin $adminEmail');
-  } on auth.FirebaseAuthException catch (e) {
-    logger.e('Firebase Auth Exception while deleting user: $e');
-    throw Exception('FirebaseAuth error: ${e.message}');
-  } catch (e, st) {
-    logger.e('Error deleting user: $e', error: e, stackTrace: st);
-    throw Exception('Failed to delete user: $e');
   }
-}
 
   @override
   Future<void> updateUser(User user) async {
@@ -476,7 +470,7 @@ Future<void> deleteUserByAdmin(
       name: currentUser.displayName ?? 'New User',
       email: currentUser.email!,
       password: '',
-      role: false,
+      role: UserRole.user,
       address: '',
       profile: '',
       providerData: [userProviderData],

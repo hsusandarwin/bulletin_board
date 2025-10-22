@@ -1,4 +1,5 @@
 import 'package:bulletin_board/config/logger.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_add.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_update.dart';
@@ -97,7 +98,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                 final name = user.name;
                 final email = user.email;
                 final address = user.address;
-                final role = user.role == true ? 'admin' : 'user';
+                final role = user.role == UserRole.admin ? 'admin' : 'user';
                 final createdAtDate = user.createdAt;
 
                 return Container(

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id;@JsonKey(name: 'displayName') String get name; String get email; String get password; bool get role; String get address; String? get profile;@UserProviderDataConverter() List<UserProviderData>? get providerData;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id;@JsonKey(name: 'displayName') String get name; String get email; String get password; UserRole get role; String get address; String? get profile;@UserProviderDataConverter() List<UserProviderData>? get providerData;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id,@JsonKey(name: 'displayName') String name, String email, String password, UserRole role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -72,7 +72,7 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as String?,providerData: freezed == providerData ? _self.providerData : providerData // ignore: cast_nullable_to_non_nullable
 as List<UserProviderData>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  UserRole role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
@@ -183,7 +183,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  UserRole role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _User():
 return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
@@ -203,7 +203,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  bool role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String name,  String email,  String password,  UserRole role,  String address,  String? profile, @UserProviderDataConverter()  List<UserProviderData>? providerData, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.role,_that.address,_that.profile,_that.providerData,_that.createdAt,_that.updatedAt);case _:
@@ -225,7 +225,7 @@ class _User implements User {
 @override@JsonKey(name: 'displayName') final  String name;
 @override final  String email;
 @override final  String password;
-@override final  bool role;
+@override final  UserRole role;
 @override final  String address;
 @override final  String? profile;
  final  List<UserProviderData>? _providerData;
@@ -273,7 +273,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String name, String email, String password, bool role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id,@JsonKey(name: 'displayName') String name, String email, String password, UserRole role, String address, String? profile,@UserProviderDataConverter() List<UserProviderData>? providerData,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -297,7 +297,7 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as bool,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
 as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
 as String?,providerData: freezed == providerData ? _self._providerData : providerData // ignore: cast_nullable_to_non_nullable
 as List<UserProviderData>?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable

@@ -1,4 +1,5 @@
 import 'package:bulletin_board/data/entities/user/user.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/provider/auth/auth_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
@@ -38,41 +39,58 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> register({
-    required String email,
-    required String password,
-    required String name,
-    required String address,
-    bool? role,
-  }) async {
-    try {
-      final userToSave = User(
-        id: _userRepository.generateNewId,
-        name: name,
-        email: email,
-        password: password,
-        profile: '',
-        role: role ?? false,
-        address: address,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+  required String email,
+  required String password,
+  required String name,
+  required String address,
+  UserRole? role,
+}) async {
+  try {
+    // 1️⃣ Create the user in Firebase Authentication
+    final userCredential = await auth.FirebaseAuth.instance
+        .createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
 
-      await _userRepository.register(userToSave);
-      state = state.copyWith(
-        user: userToSave,
-        isLoading: true,
-        isSuccess: true,
-        errorMsg: '',
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        isSuccess: false,
-        errorMsg: e.toString(),
-      );
-      rethrow;
-    }
+    // 2️⃣ Update display name
+    await userCredential.user?.updateDisplayName(name);
+
+    // 3️⃣ Use Firebase Auth UID as ID
+    final uid = userCredential.user!.uid;
+
+    // 4️⃣ Create User object with the correct ID
+    final userToSave = User(
+      id: uid,
+      name: name,
+      email: email,
+      password: password,
+      profile: '',
+      role: role ?? UserRole.user,
+      address: address,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    // 5️⃣ Save user to Firestore
+    await _userRepository.register(userToSave);
+
+    // 6️⃣ Update state
+    state = state.copyWith(
+      user: userToSave,
+      isLoading: false,
+      isSuccess: true,
+      errorMsg: '',
+    );
+  } catch (e) {
+    state = state.copyWith(
+      isLoading: false,
+      isSuccess: false,
+      errorMsg: e.toString(),
+    );
+    rethrow;
   }
+}
 
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
@@ -105,7 +123,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         address: '',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        role: false,
+        role: UserRole.user,
       );
 
       await _userRepository.saveUserToFirestore(userToSave);
@@ -161,7 +179,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           name: firebaseUser.displayName ?? '',
           email: email,
           password: '',
-          role: false,
+          role: UserRole.user,
           address: '',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -240,14 +258,11 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
       final providerId = await CurrentProviderSetting().get() ?? '';
 
-      // Delete profile image from storage if it exists
       if (profileUrl.isNotEmpty) {
         await _userRepository.deleteFromStorage(profileUrl);
       }
 
-      // Reauthentication depending on the provider
       if (providerId.contains('password')) {
-        // Only require password for email/password accounts
         if (password == null || password.isEmpty) {
           throw Exception("Password is required for reauthentication");
         }

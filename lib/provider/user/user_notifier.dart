@@ -1,5 +1,6 @@
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
+import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/provider/user/user_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -54,7 +55,7 @@ class UserNotifier extends StateNotifier<UserState> {
           name: firebaseUser.displayName ?? '',
           email: firebaseUser.email ?? '',
           password: password,
-          role: false,
+          role: UserRole.user,
           address: '',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
