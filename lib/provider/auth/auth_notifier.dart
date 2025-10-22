@@ -46,20 +46,16 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   UserRole? role,
 }) async {
   try {
-    // 1️⃣ Create the user in Firebase Authentication
     final userCredential = await auth.FirebaseAuth.instance
         .createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
 
-    // 2️⃣ Update display name
     await userCredential.user?.updateDisplayName(name);
 
-    // 3️⃣ Use Firebase Auth UID as ID
     final uid = userCredential.user!.uid;
 
-    // 4️⃣ Create User object with the correct ID
     final userToSave = User(
       id: uid,
       name: name,
@@ -72,10 +68,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       updatedAt: DateTime.now(),
     );
 
-    // 5️⃣ Save user to Firestore
     await _userRepository.register(userToSave);
 
-    // 6️⃣ Update state
     state = state.copyWith(
       user: userToSave,
       isLoading: false,
