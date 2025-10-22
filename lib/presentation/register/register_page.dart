@@ -7,6 +7,7 @@ import 'package:bulletin_board/presentation/widgets/loading_overlay.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
 import 'package:bulletin_board/validators/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -153,14 +154,12 @@ class RegisterPageState extends ConsumerState<RegisterPage> {
                         if (formKey.currentState!.validate()) {
                           ref.read(loadingProvider.notifier).state = true;
                           try {
-                            await ref
-                                .read(authNotifierProvider.notifier)
-                                .register(
-                                  email: _emailcontroller.text.trim(),
-                                  password: _pswcontroller.text.trim(),
-                                  name: _namecontroller.text.trim(),
-                                  address: _addresscontroller.text.trim(),
-                                );
+                            await ref.read(authNotifierProvider.notifier).register(
+                              email: _emailcontroller.text.trim(),
+                              password: _pswcontroller.text.trim(),
+                              name: _namecontroller.text.trim(),
+                              address: _addresscontroller.text.trim(),
+                            );
 
                             if (context.mounted) {
                               showSnackBar(
@@ -169,16 +168,17 @@ class RegisterPageState extends ConsumerState<RegisterPage> {
                                 Colors.green,
                               );
                               Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const EmailVerificationPage(),
-                                ),
+                                MaterialPageRoute(builder: (_) => const EmailVerificationPage()),
                                 (route) => false,
                               );
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              showSnackBar(context, e.toString(), Colors.red);
+                              if (e is FirebaseAuthException && e.code == 'email-already-in-use') {
+                                showSnackBar(context, "This email is already registered", Colors.red);
+                              } else {
+                                showSnackBar(context, e.toString(), Colors.red);
+                              }
                             }
                           } finally {
                             if (context.mounted) {

@@ -3,6 +3,7 @@ import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/provider/auth/auth_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
@@ -38,26 +39,28 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(errorMsg: '');
   }
 
-  Future<void> register({
+ Future<void> register({
   required String email,
   required String password,
   required String name,
   required String address,
   UserRole? role,
 }) async {
+  auth.UserCredential? userCredential;
+
   try {
-    final userCredential = await auth.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+    userCredential = await auth.FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
 
-    await userCredential.user?.updateDisplayName(name);
+    final firebaseUser = userCredential.user;
+    if (firebaseUser == null) {
+      throw Exception("Failed to create Firebase Auth user");
+    }
 
-    final uid = userCredential.user!.uid;
+    await firebaseUser.updateDisplayName(name);
 
     final userToSave = User(
-      id: uid,
+      id: firebaseUser.uid,
       name: name,
       email: email,
       password: password,
@@ -68,7 +71,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       updatedAt: DateTime.now(),
     );
 
-    await _userRepository.register(userToSave);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(firebaseUser.uid)
+        .set(userToSave.toJson());
 
     state = state.copyWith(
       user: userToSave,
@@ -76,15 +82,32 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       isSuccess: true,
       errorMsg: '',
     );
+  } on auth.FirebaseAuthException catch (e) {
+    if (e.code == 'email-already-in-use') {
+      throw Exception('Email is already registered');
+    } else if (e.code == 'weak-password') {
+      throw Exception('The password provided is too weak');
+    } else {
+      throw Exception('Firebase Auth error: ${e.message}');
+    }
   } catch (e) {
+    if (userCredential?.user != null) {
+      try {
+        await userCredential!.user!.delete();
+      } catch (_) {
+      }
+    }
+
     state = state.copyWith(
       isLoading: false,
       isSuccess: false,
       errorMsg: e.toString(),
     );
+
     rethrow;
   }
 }
+
 
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);

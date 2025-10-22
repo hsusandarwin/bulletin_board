@@ -206,8 +206,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                 confirmIcon: Icons.delete,
                                 confirmColor: Colors.red,
                                 onConfirm: () async {
-                                  ref.read(loadingProvider.notifier).state =
-                                      true;
+                                  ref.read(loadingProvider.notifier).state = true;
                                   try {
                                     final currentUser = FirebaseAuth.instance.currentUser;
                                     if (currentUser == null) {
@@ -222,6 +221,20 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                     final adminPassword = await showAdminPasswordDialog(context);
                                     if (adminPassword == null) return;
 
+                                    final adminCredential = EmailAuthProvider.credential(
+                                      email: adminEmail,
+                                      password: adminPassword,
+                                    );
+
+                                    try {
+                                      await currentUser.reauthenticateWithCredential(adminCredential);
+                                    } on FirebaseAuthException catch (_) {
+                                      if (context.mounted) {
+                                        showSnackBar(context, "Incorrect admin password! So, Cannot delete User !", Colors.red);
+                                      }
+                                      return;
+                                    }
+
                                     final userRepository = ref.read(userRepositoryProvider);
                                     final userId = user.id;
                                     logger.i('select user id --> $userId');
@@ -231,18 +244,9 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                       adminEmail,
                                       adminPassword,
                                     );
+
                                     await todoListStateNotifier.deleteTodoByUser(userId);
 
-                                    if (context.mounted &&
-                                        Navigator.canPop(context)) {
-                                      showSnackBar(
-                                        context,
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.successDelete,
-                                        Colors.green,
-                                      );
-                                    }
                                   } catch (e) {
                                     if (!context.mounted) return;
                                     showSnackBar(
@@ -253,6 +257,11 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                                   } finally {
                                     if (context.mounted) {
                                       ref.read(loadingProvider.notifier).state = false;
+                                      showSnackBar(
+                                        context,
+                                        AppLocalizations.of(context)!.successDelete,
+                                        Colors.green,
+                                      );
                                     }
                                   }
                                 },

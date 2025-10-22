@@ -166,12 +166,27 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
                           ref.read(loadingProvider.notifier).update((state) => true);
-    
+
                           try {
                             final adminEmail = FirebaseAuth.instance.currentUser!.email!;
                             final adminPassword = await showAdminPasswordDialog(context);
                             if (adminPassword == null) return;
-    
+
+                            final adminCredential = EmailAuthProvider.credential(
+                              email: adminEmail,
+                              password: adminPassword,
+                            );
+
+                            try {
+                              await FirebaseAuth.instance.currentUser!
+                                  .reauthenticateWithCredential(adminCredential);
+                            } on FirebaseAuthException {
+                              if (context.mounted) {
+                                showSnackBar( context, "Incorrect admin password", Colors.red,);
+                              }
+                              return; 
+                            }
+
                             final newUser = User(
                               id: '',
                               name: _namecontroller.text.trim(),
@@ -183,13 +198,13 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                               createdAt: DateTime.now(),
                               updatedAt: DateTime.now(),
                             );
-    
+
                             await userRepository.addUser(
                               newUser,
                               adminEmail,
                               adminPassword,
                             );
-    
+
                             if (context.mounted) {
                               showSnackBar(
                                 context,
