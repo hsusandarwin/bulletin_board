@@ -39,75 +39,73 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(errorMsg: '');
   }
 
- Future<void> register({
-  required String email,
-  required String password,
-  required String name,
-  required String address,
-  UserRole? role,
-}) async {
-  auth.UserCredential? userCredential;
+  Future<void> register({
+    required String email,
+    required String password,
+    required String name,
+    required String address,
+    UserRole? role,
+  }) async {
+    auth.UserCredential? userCredential;
 
-  try {
-    userCredential = await auth.FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
+    try {
+      userCredential = await auth.FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-    final firebaseUser = userCredential.user;
-    if (firebaseUser == null) {
-      throw Exception("Failed to create Firebase Auth user");
-    }
-
-    await firebaseUser.updateDisplayName(name);
-
-    final userToSave = User(
-      id: firebaseUser.uid,
-      name: name,
-      email: email,
-      password: password,
-      profile: '',
-      role: role ?? UserRole.user,
-      address: address,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(firebaseUser.uid)
-        .set(userToSave.toJson());
-
-    state = state.copyWith(
-      user: userToSave,
-      isLoading: false,
-      isSuccess: true,
-      errorMsg: '',
-    );
-  } on auth.FirebaseAuthException catch (e) {
-    if (e.code == 'email-already-in-use') {
-      throw Exception('Email is already registered');
-    } else if (e.code == 'weak-password') {
-      throw Exception('The password provided is too weak');
-    } else {
-      throw Exception('Firebase Auth error: ${e.message}');
-    }
-  } catch (e) {
-    if (userCredential?.user != null) {
-      try {
-        await userCredential!.user!.delete();
-      } catch (_) {
+      final firebaseUser = userCredential.user;
+      if (firebaseUser == null) {
+        throw Exception("Failed to create Firebase Auth user");
       }
+
+      await firebaseUser.updateDisplayName(name);
+
+      final userToSave = User(
+        id: firebaseUser.uid,
+        name: name,
+        email: email,
+        password: password,
+        profile: '',
+        role: role ?? UserRole.user,
+        address: address,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .set(userToSave.toJson());
+
+      state = state.copyWith(
+        user: userToSave,
+        isLoading: false,
+        isSuccess: true,
+        errorMsg: '',
+      );
+    } on auth.FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw Exception('Email is already registered');
+      } else if (e.code == 'weak-password') {
+        throw Exception('The password provided is too weak');
+      } else {
+        throw Exception('Firebase Auth error: ${e.message}');
+      }
+    } catch (e) {
+      if (userCredential?.user != null) {
+        try {
+          await userCredential!.user!.delete();
+        } catch (_) {}
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        isSuccess: false,
+        errorMsg: e.toString(),
+      );
+
+      rethrow;
     }
-
-    state = state.copyWith(
-      isLoading: false,
-      isSuccess: false,
-      errorMsg: e.toString(),
-    );
-
-    rethrow;
   }
-}
-
 
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, errorMsg: '', isSuccess: false);
@@ -290,14 +288,24 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         );
         await currentUser.reauthenticateWithCredential(credential);
       } else if (providerId.contains('google.com')) {
-        final googleProvider = auth.GoogleAuthProvider();
-        await currentUser.reauthenticateWithProvider(googleProvider);
+
+        final googleUser = await GoogleSignIn().signIn();
+        if (googleUser != null) {
+          final googleAuth = await googleUser.authentication;
+          final credential = auth.GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          await currentUser.reauthenticateWithCredential(credential);
+          await GoogleSignIn().signOut();
+        }
       }
 
       await _userRepository.deleteUser(currentUser.uid);
       await currentUser.delete();
 
       await _userRepository.signOut();
+      
     } on auth.FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         logger.e("Reauthentication required: ${e.message}");

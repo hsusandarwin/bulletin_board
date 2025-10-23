@@ -180,6 +180,7 @@ class SettingPage extends HookConsumerWidget {
                         AppLocalizations.of(context)!.successDelete,
                         Colors.green,
                       );
+                     
                     } catch (e) {
                       logger.e("Delete Error: $e");
                       if (!context.mounted) return;
