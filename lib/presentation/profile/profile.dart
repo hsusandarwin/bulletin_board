@@ -1,18 +1,21 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_field
 
 import 'dart:io';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/login/login_page.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
+import 'package:bulletin_board/presentation/widgets/show_google_map_dialog.dart';
 import 'package:bulletin_board/provider/auth/auth_notifier.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
+import 'package:bulletin_board/provider/user/user_notifier.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:bulletin_board/storage/provider_setting.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +31,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
   String? _uploadedImageUrl;
+  String? _address;
 
   bool _isEditingName = false;
   bool _isEditingEmail = false;
@@ -38,7 +42,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   User get _currentUser => FirebaseAuth.instance.currentUser!;
   String get _userId => _currentUser.uid;
 
-   String insertLineBreaks(String text, {int limit = 23}) {
+  String insertLineBreaks(String text, {int limit = 23}) {
     final buffer = StringBuffer();
     int count = 0;
     for (var char in text.characters) {
@@ -67,6 +71,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         _nameController.text = appUser.name;
         _emailController.text = appUser.email;
         _uploadedImageUrl = appUser.profile;
+        _address = appUser.address?.name;
       });
     }
   }
@@ -107,7 +112,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     setState(() => _isEditingEmail = false);
   }
-
 
   Future<void> _changePasswordDialog() async {
     final oldPasswordController = TextEditingController();
@@ -260,8 +264,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Icon(icon),
                   const SizedBox(width: 8),
                   Text(
-                    insertLineBreaks(
-                    isPassword ? '********' : value),
+                    insertLineBreaks(isPassword ? '********' : value),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -322,11 +325,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   as ImageProvider)
                       : null,
                   child: _uploadedImageUrl == null
-                      ? const Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.white,
-                        )
+                      ? const Icon(Icons.person, size: 60, color: Colors.white)
                       : null,
                 ),
                 Positioned(
@@ -356,9 +355,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 Navigator.pop(context);
                                 _pickImage(ImageSource.camera);
                               },
-                              child: Text(
-                                AppLocalizations.of(context)!.camera,
-                              ),
+                              child: Text(AppLocalizations.of(context)!.camera),
                             ),
                           ],
                         ),
@@ -397,6 +394,61 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 });
               },
               onEdit: () => setState(() => _isEditingEmail = true),
+            ),
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () async {
+                final currentAppUser = ref
+                    .watch(authNotifierProvider)
+                    .user;
+                if (currentAppUser == null) return;
+                    
+                final userNotifier = ref.read(
+                  userNotifierProvider(currentAppUser).notifier,
+                );
+                    
+                await showDialog<LatLng>(
+                  context: context,
+                  builder: (context) {
+                    return GoogleMapPickerDialog(
+                      userNotifier: userNotifier,
+                    );
+                  },
+                );
+                await _loadProfile();
+              },
+              label: Text('Choose Location From Google Map'),
+              icon: Icon(Icons.location_searching_outlined),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.location_pin, color: Colors.red),
+                const SizedBox(width: 8),
+                FutureBuilder<String?>(
+                  future: ref
+                      .read(userRepositoryProvider)
+                      .getUserAddress(_userId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Text('Loading address...');
+                    } else if (snapshot.hasError) {
+                      return const Text('Error loading address');
+                    } else if (!snapshot.hasData ||
+                        snapshot.data == null ||
+                        snapshot.data!.isEmpty) {
+                      return const Text('No address found');
+                    } else {
+                      return Text(
+                        insertLineBreaks(snapshot.data!),
+                        style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
+                      );
+                    }
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             _buildEditableRow(

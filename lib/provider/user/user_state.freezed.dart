@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserState {
 
- String? get id; String get name; String get email; String get password; String? get profile; UserRole get role; String get address; DateTime? get createdAt; DateTime? get updatedAt; Uint8List? get imageData;
+ String? get id; String get name; String get email; String get password; String get profile; UserRole get role; Address? get address; DateTime? get createdAt; DateTime? get updatedAt; Uint8List? get imageData;
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,11 +45,11 @@ abstract mixin class $UserStateCopyWith<$Res>  {
   factory $UserStateCopyWith(UserState value, $Res Function(UserState) _then) = _$UserStateCopyWithImpl;
 @useResult
 $Res call({
- String? id, String name, String email, String password, String? profile, UserRole role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
+ String? id, String name, String email, String password, String profile, UserRole role, Address? address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
 });
 
 
-
+$AddressCopyWith<$Res>? get address;
 
 }
 /// @nodoc
@@ -62,22 +62,34 @@ class _$UserStateCopyWithImpl<$Res>
 
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? name = null,Object? email = null,Object? password = null,Object? profile = freezed,Object? role = null,Object? address = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? imageData = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? name = null,Object? email = null,Object? password = null,Object? profile = null,Object? role = null,Object? address = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? imageData = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
-as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as UserRole,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as Address?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageData: freezed == imageData ? _self.imageData : imageData // ignore: cast_nullable_to_non_nullable
 as Uint8List?,
   ));
 }
+/// Create a copy of UserState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AddressCopyWith<$Res>? get address {
+    if (_self.address == null) {
+    return null;
+  }
 
+  return $AddressCopyWith<$Res>(_self.address!, (value) {
+    return _then(_self.copyWith(address: value));
+  });
+}
 }
 
 
@@ -159,7 +171,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String profile,  UserRole role,  Address? address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -180,7 +192,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  String name,  String email,  String password,  String profile,  UserRole role,  Address? address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)  $default,) {final _that = this;
 switch (_that) {
 case _UserState():
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -200,7 +212,7 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  String email,  String password,  String? profile,  UserRole role,  String address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  String name,  String email,  String password,  String profile,  UserRole role,  Address? address,  DateTime? createdAt,  DateTime? updatedAt,  Uint8List? imageData)?  $default,) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
 return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_that.role,_that.address,_that.createdAt,_that.updatedAt,_that.imageData);case _:
@@ -215,16 +227,16 @@ return $default(_that.id,_that.name,_that.email,_that.password,_that.profile,_th
 
 
 class _UserState implements UserState {
-  const _UserState({this.id = '', this.name = '', this.email = '', this.password = '', this.profile = '', this.role = UserRole.user, this.address = '', this.createdAt, this.updatedAt, this.imageData});
+  const _UserState({this.id, this.name = '', this.email = '', this.password = '', this.profile = '', this.role = UserRole.user, this.address, this.createdAt, this.updatedAt, this.imageData});
   
 
-@override@JsonKey() final  String? id;
+@override final  String? id;
 @override@JsonKey() final  String name;
 @override@JsonKey() final  String email;
 @override@JsonKey() final  String password;
-@override@JsonKey() final  String? profile;
+@override@JsonKey() final  String profile;
 @override@JsonKey() final  UserRole role;
-@override@JsonKey() final  String address;
+@override final  Address? address;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
 @override final  Uint8List? imageData;
@@ -259,11 +271,11 @@ abstract mixin class _$UserStateCopyWith<$Res> implements $UserStateCopyWith<$Re
   factory _$UserStateCopyWith(_UserState value, $Res Function(_UserState) _then) = __$UserStateCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, String name, String email, String password, String? profile, UserRole role, String address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
+ String? id, String name, String email, String password, String profile, UserRole role, Address? address, DateTime? createdAt, DateTime? updatedAt, Uint8List? imageData
 });
 
 
-
+@override $AddressCopyWith<$Res>? get address;
 
 }
 /// @nodoc
@@ -276,23 +288,35 @@ class __$UserStateCopyWithImpl<$Res>
 
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? name = null,Object? email = null,Object? password = null,Object? profile = freezed,Object? role = null,Object? address = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? imageData = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? name = null,Object? email = null,Object? password = null,Object? profile = null,Object? role = null,Object? address = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? imageData = freezed,}) {
   return _then(_UserState(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,address: null == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
-as String,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as UserRole,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as Address?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,imageData: freezed == imageData ? _self.imageData : imageData // ignore: cast_nullable_to_non_nullable
 as Uint8List?,
   ));
 }
 
+/// Create a copy of UserState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AddressCopyWith<$Res>? get address {
+    if (_self.address == null) {
+    return null;
+  }
 
+  return $AddressCopyWith<$Res>(_self.address!, (value) {
+    return _then(_self.copyWith(address: value));
+  });
+}
 }
 
 // dart format on

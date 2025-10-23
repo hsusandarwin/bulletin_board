@@ -1,15 +1,19 @@
 // ignore_for_file: deprecated_member_use
+
 import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/presentation/widgets/custom_text_field.dart';
+import 'package:bulletin_board/presentation/widgets/show_google_map_dialog.dart';
 import 'package:bulletin_board/provider/loading/loading_provider.dart';
+import 'package:bulletin_board/provider/user/user_notifier.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
 import 'package:bulletin_board/validators/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class UserUpdatePage extends StatefulHookConsumerWidget {
@@ -29,9 +33,26 @@ class UserUpdatePage extends StatefulHookConsumerWidget {
 class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
   bool isPasswordVisible = false;
   late String role;
+  late String userId;
+
+  Map<String, dynamic>? _previousAddress;
 
   late TextEditingController _emailcontroller;
   late TextEditingController _namecontroller;
+
+  String insertLineBreaks(String text, {int limit = 32}) {
+    final buffer = StringBuffer();
+    int count = 0;
+    for (var char in text.characters) {
+      buffer.write(char);
+      count++;
+      if (count >= limit) {
+        buffer.write('\n');
+        count = 0;
+      }
+    }
+    return buffer.toString();
+  }
 
   @override
   void initState() {
@@ -43,6 +64,9 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
       text: widget.userData['displayName'] ?? '',
     );
     role = (widget.userData['role'] == true) ? "Admin" : "User";
+    userId = (widget.userData['id']);
+    _previousAddress = (widget.userData['address'] as Map<String, dynamic>?)
+        ?.map((key, value) => MapEntry(key, value));
   }
 
   @override
@@ -50,6 +74,18 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
     _emailcontroller.dispose();
     _namecontroller.dispose();
     super.dispose();
+  }
+
+  Future<void> _undoAddressChange() async {
+    final userRepository = ref.read(userRepositoryProvider);
+
+    if (_previousAddress != null) {
+      await userRepository.updateUserAddress(
+        userId: userId,
+        addressName: _previousAddress!['name'] ?? '',
+        addressLocation: _previousAddress!['location'] ?? '',
+      );
+    }
   }
 
   @override
@@ -110,6 +146,65 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                     ),
                   ),
                 ),
+                TextButton.icon(
+                  onPressed: () async {
+                    final userRepo = ref.read(userRepositoryProvider);
+
+                    final selectedUser = await userRepo.getUserFuture(
+                      userId: widget.userId,
+                    );
+                    if (selectedUser == null) return;
+
+                    final userNotifier = ref.read(
+                      userNotifierProvider(selectedUser).notifier,
+                    );
+
+                    await showDialog<LatLng>(
+                      context: context,
+                      builder: (context) {
+                        return GoogleMapPickerDialog(
+                          userNotifier: userNotifier,
+                        );
+                      },
+                    );
+
+                    setState(() {});
+                  },
+                  label: const Text('Choose Location From Google Map'),
+                  icon: const Icon(Icons.location_searching_outlined),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.location_pin, color: Colors.red),
+                    const SizedBox(width: 8),
+                    FutureBuilder<String?>(
+                      future: ref
+                          .read(userRepositoryProvider)
+                          .getUserAddress(userId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Loading address...');
+                        } else if (snapshot.hasError) {
+                          return const Text('Error loading address');
+                        } else if (!snapshot.hasData ||
+                            snapshot.data == null ||
+                            snapshot.data!.isEmpty) {
+                          return const Text('No address found');
+                        } else {
+                          return Text(
+                            insertLineBreaks(snapshot.data!),
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
                 Row(
                   children: [
                     Row(
@@ -155,25 +250,33 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                       ),
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          ref.read(loadingProvider.notifier).update((state) => true);
-    
+                          ref
+                              .read(loadingProvider.notifier)
+                              .update((state) => true);
+
                           try {
+                            final addressData = widget.userData['address'] as Map<String, dynamic>?;
                             final updatedUser = User(
                               id: widget.userId,
                               name: _namecontroller.text.trim(),
                               email: _emailcontroller.text.trim(),
                               profile: widget.userData['profile'] ?? '',
                               password: '',
-                              role: role == "Admin"? UserRole.admin : UserRole.user,
-                              address: Address(name: '', location: ''),
+                              role: role == "Admin"
+                                  ? UserRole.admin
+                                  : UserRole.user,
+                              address: Address(
+                                name: addressData?['name'] ?? '',
+                                location: addressData?['location'] ?? '', 
+                              ),
                               createdAt:
                                   widget.userData['createdAt']?.toDate() ??
                                   DateTime.now(),
                               updatedAt: DateTime.now(),
                             );
-    
+
                             await userRepository.updateUser(updatedUser);
-    
+
                             if (context.mounted) {
                               showSnackBar(
                                 context,
@@ -188,7 +291,9 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                             }
                           } finally {
                             if (context.mounted) {
-                              ref.read(loadingProvider.notifier).update((state) => false);
+                              ref
+                                  .read(loadingProvider.notifier)
+                                  .update((state) => false);
                             }
                           }
                         }
@@ -202,8 +307,11 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
+                      onPressed: () async {
+                        await _undoAddressChange();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Text(
                         AppLocalizations.of(context)!.cancel,

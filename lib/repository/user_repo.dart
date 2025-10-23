@@ -40,6 +40,11 @@ abstract class BaseUserRepository {
     required String email,
     required String password,
   });
+  Future<void> updateUserAddress({
+    required String userId,
+    required String addressName,
+    required String addressLocation,
+  });
   Future<String?> uploadProfileImage(File imageFile, String userId);
   Future<void> updateDisplayName(String userId, String name);
   Future<String?> loadProfileImage(String userId);
@@ -47,6 +52,7 @@ abstract class BaseUserRepository {
   Future<void> updateProfileUser(User user);
   Future<String?> uploadProfilePhoto(File imageFile, String userId);
   Future<void> updateProfileDisplayName(String userId, String name);
+  Future<String?> getUserAddress(String userId);
   Future<void> updateEmail(String userId, String email);
   Future<String?> loadProfilePhoto(String userId);
   Stream<List<User>> fetchUsers();
@@ -105,6 +111,17 @@ class UserRepositoryImpl implements BaseUserRepository {
     await _userDB.doc(userId).update({'email': email});
   }
 
+  @override
+  Future<String?> getUserAddress(String userId) async {
+    final doc = await _userDB.doc(userId).get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null && data['address'] != null) {
+        return data['address']['name'] as String?;
+      }
+    }
+    return null;
+  }
 
   @override
   Future<String?> uploadProfilePhoto(File imageFile, String userId) async {
@@ -525,5 +542,24 @@ class UserRepositoryImpl implements BaseUserRepository {
               .where((user) => user.id != currentUserId)
               .toList(),
         );
+  }
+
+  @override
+  Future<void> updateUserAddress({
+    required String userId,
+    required String addressName,
+    required String addressLocation,
+  }) async {
+    try {
+      await _userDB.doc(userId).update({
+        'address.name': addressName,
+        'address.location': addressLocation,
+        'updatedAt': DateTime.now(),
+      });
+      logger.d('Address updated successfully');
+    } catch (e) {
+      logger.e('⚡ ERROR updating address: $e');
+      rethrow;
+    }
   }
 }

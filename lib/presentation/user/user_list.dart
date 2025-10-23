@@ -1,4 +1,3 @@
-import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
 import 'package:bulletin_board/presentation/user/widgets/user_add.dart';
@@ -138,7 +137,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                           ),
                           Text(
                             insertLineBreaks(
-                              "${AppLocalizations.of(context)!.address} : $address",
+                              "${AppLocalizations.of(context)!.address} : ${address?.name}",
                             ),
                           ),
                           Text(
@@ -237,7 +236,6 @@ class _UserListPageState extends ConsumerState<UserListPage> {
 
                                     final userRepository = ref.read(userRepositoryProvider);
                                     final userId = user.id;
-                                    logger.i('select user id --> $userId');
 
                                     await userRepository.deleteUserByAdmin(
                                       userId,

@@ -4,6 +4,9 @@ import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/provider/user/user_state.dart';
 import 'package:bulletin_board/repository/user_repo.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final userNotifierProvider = StateNotifierProvider.autoDispose
@@ -84,5 +87,61 @@ class UserNotifier extends StateNotifier<UserState> {
       logger.e("Login failed: $e");
       return null;
     }
+  }
+
+  Future<String?> getAddressFromLatLng(LatLng location) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        location.latitude,
+        location.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        String address =
+            (place.thoroughfare != null && place.thoroughfare != '')
+            ? '${place.name}, ${place.thoroughfare}'
+            : '${place.name}';
+        // address += (place.subLocality != null && place.subLocality != '')
+        //     ? ', ${place.subLocality}'
+        //     : '';
+        // address += (place.street != null && place.street != '')
+        //     ? ', ${place.street}'
+        //     : '';
+        address += (place.locality != null && place.locality != '')
+            ? ', ${place.locality}'
+            : '';
+        address +=
+            (place.administrativeArea != null && place.administrativeArea != '')
+            ? ', ${place.administrativeArea}'
+            : '';
+        address += (place.country != null && place.country != '')
+            ? ', ${place.country}'
+            : '';
+
+        return address;
+      }
+    } catch (e) {
+      logger.e("Error during reverse geocoding: $e");
+    }
+    return null;
+  }
+
+  Future<void> updateAddress({
+    required String name,
+    required LatLng pickedLocation,
+  }) async {
+    if (user == null) {
+      throw Exception('No user logged in');
+    }
+    final newAddress = Address(
+      name: name,
+      location: '${pickedLocation.latitude},${pickedLocation.longitude}',
+    );
+
+    await FirebaseFirestore.instance.collection('users').doc(user!.id).update({
+      'address': newAddress.toJson(),
+    });
+
+    state = state.copyWith(address: newAddress);
   }
 }
