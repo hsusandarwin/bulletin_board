@@ -12,7 +12,9 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   email: json['email'] as String,
   password: json['password'] as String,
   role: $enumDecode(_$UserRoleEnumMap, json['role']),
-  address: json['address'] as String,
+  address: const NullableAddressConverters().fromJson(
+    json['address'] as Map<String, dynamic>?,
+  ),
   profile: json['profile'] as String?,
   providerData: (json['providerData'] as List<dynamic>?)
       ?.map(const UserProviderDataConverter().fromJson)
@@ -27,7 +29,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'email': instance.email,
   'password': instance.password,
   'role': _$UserRoleEnumMap[instance.role]!,
-  'address': instance.address,
+  'address': const NullableAddressConverters().toJson(instance.address),
   'profile': instance.profile,
   'providerData': instance.providerData
       ?.map(const UserProviderDataConverter().toJson)

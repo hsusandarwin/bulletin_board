@@ -27,7 +27,6 @@ class RegisterPageState extends ConsumerState<RegisterPage> {
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _pswcontroller = TextEditingController();
   final TextEditingController _confirmpswcontroller = TextEditingController();
-  final TextEditingController _addresscontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -79,20 +78,6 @@ class RegisterPageState extends ConsumerState<RegisterPage> {
                         validator: (value) => Validators.validateRequiredField(
                           value: value,
                           labelText: AppLocalizations.of(context)!.enterName,
-                          context: context,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      child: CustomTextField(
-                        controller: _addresscontroller,
-                        label: AppLocalizations.of(context)!.address,
-                        maxLength: 40,
-                        isRequired: true,
-                        validator: (value) => Validators.validateRequiredField(
-                          value: value,
-                          labelText: AppLocalizations.of(context)!.enterAddress,
                           context: context,
                         ),
                       ),
@@ -157,8 +142,7 @@ class RegisterPageState extends ConsumerState<RegisterPage> {
                             await ref.read(authNotifierProvider.notifier).register(
                               email: _emailcontroller.text.trim(),
                               password: _pswcontroller.text.trim(),
-                              name: _namecontroller.text.trim(),
-                              address: _addresscontroller.text.trim(),
+                              name: _namecontroller.text.trim(), 
                             );
 
                             if (context.mounted) {

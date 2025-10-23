@@ -1,3 +1,4 @@
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/storage/provider_setting.dart';
@@ -43,7 +44,6 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
     required String name,
-    required String address,
     UserRole? role,
   }) async {
     auth.UserCredential? userCredential;
@@ -66,7 +66,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         password: password,
         profile: '',
         role: role ?? UserRole.user,
-        address: address,
+        address: Address(name: '', location: ''),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -135,7 +135,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         email: email,
         password: '',
         profile: firebaseUser.photoURL ?? '',
-        address: '',
+        address: Address(name: '', location: ''),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         role: UserRole.user,
@@ -195,7 +195,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           email: email,
           password: '',
           role: UserRole.user,
-          address: '',
+          address: Address(name: '', location: ''),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );

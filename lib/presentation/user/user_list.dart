@@ -54,7 +54,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
     final filteredUsers = usersCollection.where((user) {
       final name = user.name.toLowerCase();
       final email = user.email.toLowerCase();
-      final address = user.address.toLowerCase();
+      final address = '';
       final role = (user.role == UserRole.admin ? 'admin' : 'user').toLowerCase();
 
       final combined = "$name $email $address $role";

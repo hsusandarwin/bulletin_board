@@ -31,11 +31,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   bool _isEditingName = false;
   bool _isEditingEmail = false;
-  bool _isEditingAddress = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
 
   User get _currentUser => FirebaseAuth.instance.currentUser!;
   String get _userId => _currentUser.uid;
@@ -68,7 +66,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       setState(() {
         _nameController.text = appUser.name;
         _emailController.text = appUser.email;
-        _addressController.text = appUser.address;
         _uploadedImageUrl = appUser.profile;
       });
     }
@@ -111,14 +108,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     setState(() => _isEditingEmail = false);
   }
 
-  Future<void> _updateAddress() async {
-    final repo = ref.read(userRepositoryProvider);
-    final newAddress = _addressController.text.trim();
-    if (newAddress.isEmpty) return;
-
-    await repo.updateAddress(_userId, newAddress);
-    setState(() => _isEditingAddress = false);
-  }
 
   Future<void> _changePasswordDialog() async {
     final oldPasswordController = TextEditingController();
@@ -408,20 +397,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 });
               },
               onEdit: () => setState(() => _isEditingEmail = true),
-            ),
-            const SizedBox(height: 20),
-            _buildEditableRow(
-              icon: Icons.home,
-              value: _addressController.text,
-              isEditing: _isEditingAddress,
-              controller: _addressController,
-              onSave: _updateAddress,
-              onCancel: () {
-                setState(() {
-                  _isEditingAddress = false;
-                });
-              },
-              onEdit: () => setState(() => _isEditingAddress = true),
             ),
             const SizedBox(height: 20),
             _buildEditableRow(

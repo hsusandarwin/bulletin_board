@@ -1,4 +1,5 @@
 import 'package:bulletin_board/config/logger.dart';
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/provider/user/user_state.dart';
@@ -56,7 +57,7 @@ class UserNotifier extends StateNotifier<UserState> {
           email: firebaseUser.email ?? '',
           password: password,
           role: UserRole.user,
-          address: '',
+          address: Address(name: '', location: ''),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -74,7 +75,6 @@ class UserNotifier extends StateNotifier<UserState> {
           email: user.email,
           password: user.password,
           role: user.role,
-          address: user.address,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         );

@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
@@ -26,7 +27,6 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
   final TextEditingController _emailcontroller = TextEditingController();
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _pswcontroller = TextEditingController();
-  final TextEditingController _addresscontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -82,20 +82,6 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                     validator: (value) => Validators.validateRequiredField(
                       value: value,
                       labelText: AppLocalizations.of(context)!.enterName,
-                      context: context,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: CustomTextField(
-                    controller: _addresscontroller,
-                    label: AppLocalizations.of(context)!.address,
-                    maxLength: 40,
-                    isRequired: true,
-                    validator: (value) => Validators.validateRequiredField(
-                      value: value,
-                      labelText: AppLocalizations.of(context)!.enterAddress,
                       context: context,
                     ),
                   ),
@@ -194,7 +180,7 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                               password: _pswcontroller.text.trim(),
                               profile: '',
                               role: role == "Admin" ? UserRole.admin : UserRole.user,
-                              address: _addresscontroller.text.trim(),
+                              address: Address(name: '', location: ''),
                               createdAt: DateTime.now(),
                               updatedAt: DateTime.now(),
                             );

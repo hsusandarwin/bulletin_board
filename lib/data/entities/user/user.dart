@@ -1,7 +1,9 @@
 // ignore_for_file: invalid_annotation_target
 
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
+import 'package:bulletin_board/utils/converters/address_con.dart';
 import 'package:bulletin_board/utils/converters/timestamp_con.dart';
 import 'package:bulletin_board/utils/converters/user_pro_data_con.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -17,7 +19,7 @@ abstract class User with _$User {
     required String email,
     required String password,
     required UserRole role,
-    required String address,
+    @NullableAddressConverters() Address? address,
     String? profile,
     @UserProviderDataConverter() List<UserProviderData>? providerData,
     @TimestampConverter() required DateTime createdAt,

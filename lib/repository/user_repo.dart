@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bulletin_board/config/logger.dart';
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/entities/user_provider_data/user_provider_data.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
@@ -47,7 +48,6 @@ abstract class BaseUserRepository {
   Future<String?> uploadProfilePhoto(File imageFile, String userId);
   Future<void> updateProfileDisplayName(String userId, String name);
   Future<void> updateEmail(String userId, String email);
-  Future<void> updateAddress(String userId, String address);
   Future<String?> loadProfilePhoto(String userId);
   Stream<List<User>> fetchUsers();
 }
@@ -105,10 +105,6 @@ class UserRepositoryImpl implements BaseUserRepository {
     await _userDB.doc(userId).update({'email': email});
   }
 
-  @override
-  Future<void> updateAddress(String userId, String address) async {
-    await _userDB.doc(userId).update({'address': address});
-  }
 
   @override
   Future<String?> uploadProfilePhoto(File imageFile, String userId) async {
@@ -471,7 +467,7 @@ class UserRepositoryImpl implements BaseUserRepository {
       email: currentUser.email!,
       password: '',
       role: UserRole.user,
-      address: '',
+      address: Address(name: '', location: ''),
       profile: '',
       providerData: [userProviderData],
       createdAt: DateTime.now(),

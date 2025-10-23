@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use
+import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
@@ -31,7 +32,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
 
   late TextEditingController _emailcontroller;
   late TextEditingController _namecontroller;
-  late TextEditingController _addresscontroller;
 
   @override
   void initState() {
@@ -42,9 +42,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
     _namecontroller = TextEditingController(
       text: widget.userData['displayName'] ?? '',
     );
-    _addresscontroller = TextEditingController(
-      text: widget.userData['address'] ?? '',
-    );
     role = (widget.userData['role'] == true) ? "Admin" : "User";
   }
 
@@ -52,7 +49,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
   void dispose() {
     _emailcontroller.dispose();
     _namecontroller.dispose();
-    _addresscontroller.dispose();
     super.dispose();
   }
 
@@ -114,20 +110,6 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: CustomTextField(
-                    controller: _addresscontroller,
-                    label: AppLocalizations.of(context)!.address,
-                    maxLength: 40,
-                    isRequired: true,
-                    validator: (value) => Validators.validateRequiredField(
-                      value: value,
-                      labelText: AppLocalizations.of(context)!.enterAddress,
-                      context: context,
-                    ),
-                  ),
-                ),
                 Row(
                   children: [
                     Row(
@@ -183,7 +165,7 @@ class UserUpdatePageState extends ConsumerState<UserUpdatePage> {
                               profile: widget.userData['profile'] ?? '',
                               password: '',
                               role: role == "Admin"? UserRole.admin : UserRole.user,
-                              address: _addresscontroller.text.trim(),
+                              address: Address(name: '', location: ''),
                               createdAt:
                                   widget.userData['createdAt']?.toDate() ??
                                   DateTime.now(),
