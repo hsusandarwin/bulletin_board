@@ -195,13 +195,6 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
                               },
                               child: Text(AppLocalizations.of(context)!.camera),
                             ),
-                            // TextButton(
-                            //   onPressed: () {
-                            //     Navigator.pop(context);
-                            //     _removeImage();
-                            //   },
-                            //   child: Text(AppLocalizations.of(context)!.delete),
-                            // ),
                           ],
                         ),
                       );
