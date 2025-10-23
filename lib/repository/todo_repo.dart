@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/data/entities/todo/liked_by_user.dart';
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -81,7 +80,6 @@ class TodoRepositoryImpl implements BaseTodoRepository {
         ),
       );
       imageUrl = response.secureUrl;
-      logger.i('add image --> $imageUrl');
     }
 
     final todo = Todo(

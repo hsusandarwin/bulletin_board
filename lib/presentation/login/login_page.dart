@@ -35,6 +35,14 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final emailController = TextEditingController();
   final pswController = TextEditingController();
 
+    @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(loadingProvider.notifier).update((state) => false);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final formKey = useMemoized(() => GlobalKey<FormState>());

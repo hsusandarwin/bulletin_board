@@ -60,12 +60,6 @@ class _ToDoUpdatePageState extends ConsumerState<ToDoUpdatePage> {
     }
   }
 
-  // void _removeImage() {
-  //   setState(() {
-  //     _selectedImage = null;
-  //   });
-  // }
-
   Widget _buildImagePreview() {
     if (_selectedImage != null) {
       return Padding(
