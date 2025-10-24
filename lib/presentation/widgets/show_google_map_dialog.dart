@@ -18,7 +18,7 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
   late GoogleMapController mapController;
   LatLng _currentPosition = const LatLng(0, 0);
   LatLng _pickedLocation = const LatLng(0, 0);
-  bool _isLoading = true; // Loading state
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -71,13 +71,6 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
     });
   }
 
-  // void _onCameraMove(CameraPosition position) {
-  //   setState(() {
-  //     _pickedLocation =
-  //         position.target; // Update picked location as the camera moves
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -107,16 +100,8 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
                       snippet:
                           'Lat: ${_pickedLocation.latitude}, Lng: ${_pickedLocation.longitude}',
                     ),
-                    // draggable: true,
-                    // onDragEnd: (newPosition) {
-                    //   setState(() {
-                    //     _pickedLocation =
-                    //         newPosition; // Update picked location on drag end
-                    //   });
-                    // },
                   ),
                 },
-                // onCameraMove: _onCameraMove,
               ),
       ),
       actions: [
@@ -124,7 +109,6 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
           onPressed: () => Navigator.of(context).pop(null), // Cancel button
           child: Text(
             "Cancel",
-            style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
         TextButton(
@@ -161,7 +145,6 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
           // Confirm button
           child: Text(
             "Confirm",
-            style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
       ],
