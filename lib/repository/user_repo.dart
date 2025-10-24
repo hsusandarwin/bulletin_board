@@ -56,6 +56,7 @@ abstract class BaseUserRepository {
   Future<void> updateEmail(String userId, String email);
   Future<String?> loadProfilePhoto(String userId);
   Stream<List<User>> fetchUsers();
+  Stream<List<User?>> fetchUserListWithAddress();
 }
 
 final userRepositoryProvider = Provider<UserRepositoryImpl>(
@@ -561,5 +562,20 @@ class UserRepositoryImpl implements BaseUserRepository {
       logger.e('⚡ ERROR updating address: $e');
       rethrow;
     }
+  }
+
+  @override
+  Stream<List<User>> fetchUserListWithAddress() {
+    final currentUserId = auth.FirebaseAuth.instance.currentUser?.uid;
+
+    return _userDB
+        .where('address.location', isGreaterThan: '')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => User.fromJson(doc.data()))
+              .where((user) => user.id != currentUserId)
+              .toList(),
+        );
   }
 }

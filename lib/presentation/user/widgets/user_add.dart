@@ -28,6 +28,8 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
   final TextEditingController _emailcontroller = TextEditingController();
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _pswcontroller = TextEditingController();
+  final TextEditingController _addresscontroller = TextEditingController();
+
 
    @override
   void initState() {
@@ -92,6 +94,20 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                       validator: (value) => Validators.validateRequiredField(
                         value: value,
                         labelText: AppLocalizations.of(context)!.enterName,
+                        context: context,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    child: CustomTextField(
+                      controller: _addresscontroller,
+                      label: AppLocalizations.of(context)!.address,
+                      maxLength: 40,
+                      isRequired: true,
+                      validator: (value) => Validators.validateRequiredField(
+                        value: value,
+                        labelText: AppLocalizations.of(context)!.enterAddress,
                         context: context,
                       ),
                     ),
@@ -190,7 +206,7 @@ class UserAddPageState extends ConsumerState<UserAddPage> {
                                 password: _pswcontroller.text.trim(),
                                 profile: '',
                                 role: role == "Admin" ? UserRole.admin : UserRole.user,
-                                address: Address(name: '', location: ''),
+                                address: Address(name: _addresscontroller.text.trim(), location: ''),
                                 createdAt: DateTime.now(),
                                 updatedAt: DateTime.now(),
                               );

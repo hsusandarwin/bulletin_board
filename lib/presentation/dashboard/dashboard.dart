@@ -1,5 +1,6 @@
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
+import 'package:bulletin_board/presentation/dashboard/widgets/navigator_drawer.dart';
 import 'package:bulletin_board/presentation/todo_list/widgets/todo_update.dart';
 import 'package:bulletin_board/presentation/widgets/commom_dialog.dart';
 import 'package:bulletin_board/provider/todo/todo_notifier.dart';
@@ -19,6 +20,7 @@ class DashboardPage extends ConsumerStatefulWidget {
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool isFavorite = false;
+   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,13 +34,27 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final likedPostsAsync = ref.watch(getRecentLikesProvider);
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
-          AppLocalizations.of(context)!.dashboard,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        title: GestureDetector(
+          child: Icon(Icons.sort,size: 35,),
+          onTap: (){_scaffoldKey.currentState?.openDrawer();},
         ),
+        actions: [
+          Container(
+            padding: EdgeInsets.only(right: 20),
+            child: Text(
+              AppLocalizations.of(context)!.dashboard,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
+              ),
+            ),
+          ),
+        ],
       ),
+      drawer: const NavigatorDrawer(),
       body: todosAsync.when(
         data: (todos) {
           return Column(
@@ -334,41 +350,47 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         top: Radius.circular(12),
                       ),
                       child: Container(
-                          width: double.infinity,
-                          color: Colors.grey[200],
-                          child: todo.image != null && todo.image!.isNotEmpty
-                              ? FutureBuilder(
-                              future: precacheImage(NetworkImage(todo.image!), context),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState != ConnectionState.done) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
+                        width: double.infinity,
+                        color: Colors.grey[200],
+                        child: todo.image != null && todo.image!.isNotEmpty
+                            ? FutureBuilder(
+                                future: precacheImage(
+                                  NetworkImage(todo.image!),
+                                  context,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState !=
+                                      ConnectionState.done) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  return Image.network(
+                                    todo.image!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Center(
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                size: 60,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                   );
-                                }
-                                return Image.network(
-                                  todo.image!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 60,
-                                      color: Colors.grey,
-                                    ),
+                                },
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 60,
+                                    color: Colors.grey,
                                   ),
-                                );
-                              },
-                        )
-                        : Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 60,
-                                color: Colors.grey,
+                                ),
                               ),
-                            ),
-                          ),
-                      )
+                      ),
                     ),
                   ),
                   Padding(

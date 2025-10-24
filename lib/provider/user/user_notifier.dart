@@ -38,6 +38,11 @@ final fetchUsersProvider = StreamProvider<List<User>>((ref) {
   return repo.fetchUsers();
 });
 
+final fetchUsersByAddressStream = StreamProvider<List<User?>>((ref) {
+  final repo = ref.watch(userRepositoryProvider);
+  return repo.fetchUserListWithAddress();
+});
+
 class UserNotifier extends StateNotifier<UserState> {
   UserNotifier(this.user, this.userRepository) : super(UserState());
 
