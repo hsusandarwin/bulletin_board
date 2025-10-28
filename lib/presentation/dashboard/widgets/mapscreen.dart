@@ -1,14 +1,12 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/provider/map/directions_model.dart';
 import 'package:bulletin_board/repository/directions_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';

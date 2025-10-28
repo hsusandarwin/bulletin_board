@@ -48,4 +48,4 @@ app.*.map.json
 .fvm/
 
 #api key
-api_keys_dev.json
+api_keys.dev.json
