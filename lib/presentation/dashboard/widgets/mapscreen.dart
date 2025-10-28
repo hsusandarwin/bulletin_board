@@ -110,23 +110,23 @@ class _MapScreenPageState extends State<MapScreenPage> {
     }
   }
 
-  void _directionLoad() {
-    if (widget.selectedUsers.isEmpty) return;
+  // void _directionLoad() {
+  //   if (widget.selectedUsers.isEmpty) return;
 
-    _directionsTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-      for (var user in widget.selectedUsers) {
-        final loc = user.address?.location;
-        if (loc != null && loc.contains(',')) {
-          final parts = loc.split(',');
-          final lat = double.tryParse(parts[0].trim());
-          final lng = double.tryParse(parts[1].trim());
-          if (lat != null && lng != null) {
-            await _fetchDirectionsToUser(user, LatLng(lat, lng));
-          }
-        }
-      }
-    });
-  }
+  //   _directionsTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+  //     for (var user in widget.selectedUsers) {
+  //       final loc = user.address?.location;
+  //       if (loc != null && loc.contains(',')) {
+  //         final parts = loc.split(',');
+  //         final lat = double.tryParse(parts[0].trim());
+  //         final lng = double.tryParse(parts[1].trim());
+  //         if (lat != null && lng != null) {
+  //           await _fetchDirectionsToUser(user, LatLng(lat, lng));
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
   void _loadUserMarkers() {
     for (var user in widget.selectedUsers) {
