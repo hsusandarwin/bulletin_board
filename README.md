@@ -22,6 +22,6 @@ flutter pub run build_runner build --delete-conflicting-output
 ### Run Project In Development
 
 ```shell
-fvm flutter run 
+fvm flutter run --dart-define-from-file=api_keys.dev.json
 ```
 

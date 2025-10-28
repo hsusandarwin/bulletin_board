@@ -9,7 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
-  const google_api_key = String.fromEnvironment('GOOGLE_API_KEY');
-  logger.f('api ---->$google_api_key');
+  const googleApiKey = String.fromEnvironment('GOOGLE_API_KEY');
+  logger.f('api ---->$googleApiKey');
   runApp(const ProviderScope(child: MyApp()));
 }
