@@ -1,12 +1,14 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bulletin_board/config/logger.dart';
 import 'package:bulletin_board/provider/map/directions_model.dart';
 import 'package:bulletin_board/repository/directions_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
@@ -90,10 +92,13 @@ class _MapScreenPageState extends State<MapScreenPage> {
   }
 
   Future<void> _fetchDirectionsToUser(User user, LatLng destination) async {
-    const orsKey =
-        'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjI4MmRiMmIzOTExYTQyMzI4OGRiNzM4YzBlYTU5MTk5IiwiaCI6Im11cm11cjY0In0';
-
-    final repo = DirectionsRepository(dio: Dio(), apiKey: orsKey);
+    // final String configString = await rootBundle.loadString(
+    //   'api_keys.dev.json',
+    // );
+    // final Map<String, dynamic> config = json.decode(configString);
+    // final orsKey = config['OPEN_ROUTE_API_KEY'];
+    final apiKey = String.fromEnvironment('OPEN_ROUTE_API_KEY');
+    final repo = DirectionsRepository(dio: Dio(), apiKey: apiKey);
     final directions = await repo.getDirections(
       origin: _currentPosition,
       destination: destination,
@@ -138,7 +143,7 @@ class _MapScreenPageState extends State<MapScreenPage> {
         if (lat != null && lng != null) {
           setState(() {
             _markers = {
-              ..._markers, 
+              ..._markers,
               Marker(
                 markerId: MarkerId(user.email),
                 position: LatLng(lat, lng),
