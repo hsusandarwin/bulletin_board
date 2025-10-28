@@ -81,7 +81,7 @@ class GoogleMapPickerDialogState extends ConsumerState<GoogleMapPickerDialog> {
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(),
-              ) // Loading indicator
+              )
             : GoogleMap(
                 onMapCreated: (GoogleMapController controller) {
                   mapController = controller;

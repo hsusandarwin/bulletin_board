@@ -1,23 +1,28 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
 }
 
 dependencies {
-  // Import the Firebase BoM
   implementation(platform("com.google.firebase:firebase-bom:34.2.0"))
 
-
-  // TODO: Add the dependencies for Firebase products you want to use
-  // When using the BoM, don't specify versions in Firebase dependencies
   implementation("com.google.firebase:firebase-analytics")
+}
 
-
-  // Add the dependencies for any other desired Firebase products
-  // https://firebase.google.com/docs/android/setup#available-libraries
+val dartEnvironmentVariables = mutableMapOf<String, String>()
+if (project.hasProperty("dart-defines")) {
+    val dartDefines = project.property("dart-defines").toString().split(",")
+    dartDefines.forEach { entry ->
+        val decoded = String(Base64.getDecoder().decode(entry), Charsets.UTF_8)
+        val pair = decoded.split("=")
+        if (pair.size == 2) {
+            dartEnvironmentVariables[pair[0]] = pair[1]
+        }
+    }
 }
 
 android {
@@ -35,10 +40,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        resValue("string", "GOOGLE_API_KEY", dartEnvironmentVariables["GOOGLE_API_KEY"] ?: "")
         applicationId = "com.hsw.bulletin_board"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -47,8 +50,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }

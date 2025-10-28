@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:bulletin_board/data/entities/todo/todo.dart';
 import 'package:bulletin_board/data/enums/user_role/user_role.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';

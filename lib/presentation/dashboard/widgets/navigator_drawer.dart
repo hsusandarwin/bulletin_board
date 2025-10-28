@@ -1,5 +1,6 @@
 import 'package:bulletin_board/data/entities/user/user.dart';
 import 'package:bulletin_board/l10n/app_localizations.dart';
+import 'package:bulletin_board/presentation/dashboard/widgets/mapscreen.dart';
 import 'package:bulletin_board/provider/user/user_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,7 +14,7 @@ class NavigatorDrawer extends ConsumerStatefulWidget {
 
 class _NavigatorDrawerState extends ConsumerState<NavigatorDrawer> {
   String searchQuery = "";
-   final Set<User> _selectedUsers = {};
+  final Set<User> _selectedUsers = {};
 
   String insertLineBreaks(String text, {int limit = 25}) {
     final buffer = StringBuffer();
@@ -57,31 +58,64 @@ class _NavigatorDrawerState extends ConsumerState<NavigatorDrawer> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
-                  'You can select user location and view their location!',
+                  'You can select user(s) and view their location!',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
-              
+              const SizedBox(height: 10),
+
               Expanded(
                 child: ListView.builder(
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
                     final user = filteredUsers[index];
 
-                    return Container(
-                      margin: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey,width: 2,style: BorderStyle.solid)
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          insertLineBreaks(
-                            "${AppLocalizations.of(context)!.name}: ${user?.name}",
-                          ),
+                    final isSelected = _selectedUsers.contains(user);
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedUsers.remove(user);
+                          } else {
+                            _selectedUsers.add(user!);
+                          }
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        subtitle: Text(
-                          insertLineBreaks(
-                            "${AppLocalizations.of(context)!.email}: ${user?.email}",
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.blue[180] : Colors.white,
+                          border: Border.all(
+                            color: isSelected ? Colors.blue : Colors.grey,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ListTile(
+                          leading: Icon(
+                            isSelected
+                                ? Icons.check_circle
+                                : Icons.circle_outlined,
+                            color: isSelected ? Colors.blue : Colors.grey,
+                          ),
+                          title: Text(
+                            insertLineBreaks(
+                              "${AppLocalizations.of(context)!.name}: ${user?.name}",
+                            ),
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                          subtitle: Text(
+                            insertLineBreaks(
+                              "${AppLocalizations.of(context)!.email}: ${user?.email}",
+                            ),
                           ),
                         ),
                       ),
@@ -89,6 +123,40 @@ class _NavigatorDrawerState extends ConsumerState<NavigatorDrawer> {
                   },
                 ),
               ),
+
+              if (_selectedUsers.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MapScreenPage(
+                              selectedUsers: _selectedUsers.toList(),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'View Selected on Map',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },

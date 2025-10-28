@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:bulletin_board/data/entities/address/address.dart';
 import 'package:bulletin_board/data/entities/user/user.dart';
