@@ -6,8 +6,6 @@ fvm install 3.35.3
 
 fvm use 3.35.3
 
-flutter clean
-
 fvm flutter pub get
 ```
 
