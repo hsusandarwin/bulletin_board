@@ -42,52 +42,74 @@ class _MapScreenPageState extends State<MapScreenPage> {
   }
 
   Future<void> _getCurrentLocation() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+  try {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-      _currentPosition = LatLng(position.latitude, position.longitude);
-      logger.f('_currentPosition --> $_currentPosition');
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      logger.e('Location services are disabled.');
+      return;
+    }
 
-      _markers.add(
-        Marker(
-          markerId: const MarkerId('current_location'),
-          position: _currentPosition,
-          infoWindow: const InfoWindow(title: 'You are here'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
-        ),
-      );
-
-      if (_mapController != null) {
-        _mapController!.animateCamera(CameraUpdate.newLatLng(_currentPosition));
-
-        // _loadUserMarkers();
-
-        // _directionLoad();
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        logger.e('User denied permissions to access the device\'s location.');
+        return;
       }
+    }
 
-      if (mounted) setState(() {});
+    if (permission == LocationPermission.deniedForever) {
+      logger.e(
+        'Location permissions are permanently denied. Please enable them in app settings.',
+      );
+      return;
+    }
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
-      if (widget.selectedUsers.isNotEmpty) {
-        for (var user in widget.selectedUsers) {
-          final loc = user.address?.location;
-          if (loc != null && loc.contains(',')) {
-            final parts = loc.split(',');
-            final lat = double.tryParse(parts[0].trim());
-            final lng = double.tryParse(parts[1].trim());
-            if (lat != null && lng != null) {
-              await _fetchDirectionsToUser(user, LatLng(lat, lng));
-            }
+    _currentPosition = LatLng(position.latitude, position.longitude);
+    logger.f('_currentPosition --> $_currentPosition');
+
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('current_location'),
+        position: _currentPosition,
+        infoWindow: const InfoWindow(title: 'You are here'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueAzure,
+        ),
+      ),
+    );
+
+    if (_mapController != null) {
+      _mapController!.animateCamera(CameraUpdate.newLatLng(_currentPosition));
+      // _loadUserMarkers();
+      // _directionLoad();
+    }
+
+    if (mounted) setState(() {});
+
+    if (widget.selectedUsers.isNotEmpty) {
+      for (var user in widget.selectedUsers) {
+        final loc = user.address?.location;
+        if (loc != null && loc.contains(',')) {
+          final parts = loc.split(',');
+          final lat = double.tryParse(parts[0].trim());
+          final lng = double.tryParse(parts[1].trim());
+          if (lat != null && lng != null) {
+            await _fetchDirectionsToUser(user, LatLng(lat, lng));
           }
         }
       }
-    } catch (e) {
-      logger.e('Error getting location: $e');
     }
+  } catch (e) {
+    logger.e('Error getting location: $e');
   }
+}
 
   Future<void> _fetchDirectionsToUser(User user, LatLng destination) async {
     // final String configString = await rootBundle.loadString(
@@ -105,7 +127,6 @@ class _MapScreenPageState extends State<MapScreenPage> {
     if (directions != null && mounted) {
       setState(() {
         _userDirections[user.email] = directions;
-        logger.f('info for ${user.email} --> $directions');
       });
       _mapController?.animateCamera(
         CameraUpdate.newLatLngBounds(directions.bounds, 50),
