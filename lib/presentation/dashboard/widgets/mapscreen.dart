@@ -25,6 +25,8 @@ class _MapScreenPageState extends State<MapScreenPage> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   final Map<String, Directions> _userDirections = {};
+  bool _showAllUsers = true;
+  bool _showRoute = true;
 
   Timer? _directionsTimer;
 
@@ -41,75 +43,117 @@ class _MapScreenPageState extends State<MapScreenPage> {
     super.dispose();
   }
 
+  void showFilterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Filter Options'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CheckboxListTile(
+                title: Text('Show Route'),
+                value: _showRoute,
+                onChanged: (value) {
+                  setState(() {
+                    _showRoute = value!;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              CheckboxListTile(
+                title: Text('Show Users'),
+                value: _showAllUsers,
+                onChanged: (value) {
+                  setState(() {
+                    _showAllUsers = value!;
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _getCurrentLocation() async {
-  try {
-    bool serviceEnabled;
-    LocationPermission permission;
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      logger.e('Location services are disabled.');
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        logger.e('User denied permissions to access the device\'s location.');
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        logger.e('Location services are disabled.');
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      logger.e(
-        'Location permissions are permanently denied. Please enable them in app settings.',
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          logger.e('User denied permissions to access the device\'s location.');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        logger.e(
+          'Location permissions are permanently denied. Please enable them in app settings.',
+        );
+        return;
+      }
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
       );
-      return;
-    }
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
 
-    _currentPosition = LatLng(position.latitude, position.longitude);
-    logger.f('_currentPosition --> $_currentPosition');
+      _currentPosition = LatLng(position.latitude, position.longitude);
+      logger.f('_currentPosition --> $_currentPosition');
 
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('current_location'),
-        position: _currentPosition,
-        infoWindow: const InfoWindow(title: 'You are here'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueAzure,
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('current_location'),
+          position: _currentPosition,
+          infoWindow: const InfoWindow(title: 'You are here'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
         ),
-      ),
-    );
+      );
 
-    if (_mapController != null) {
-      _mapController!.animateCamera(CameraUpdate.newLatLng(_currentPosition));
-      // _loadUserMarkers();
-      // _directionLoad();
-    }
+      if (_mapController != null) {
+        _mapController!.animateCamera(CameraUpdate.newLatLng(_currentPosition));
+        // _loadUserMarkers();
+        // _directionLoad();
+      }
 
-    if (mounted) setState(() {});
+      if (mounted) setState(() {});
 
-    if (widget.selectedUsers.isNotEmpty) {
-      for (var user in widget.selectedUsers) {
-        final loc = user.address?.location;
-        if (loc != null && loc.contains(',')) {
-          final parts = loc.split(',');
-          final lat = double.tryParse(parts[0].trim());
-          final lng = double.tryParse(parts[1].trim());
-          if (lat != null && lng != null) {
-            await _fetchDirectionsToUser(user, LatLng(lat, lng));
+      if (widget.selectedUsers.isNotEmpty) {
+        for (var user in widget.selectedUsers) {
+          final loc = user.address?.location;
+          if (loc != null && loc.contains(',')) {
+            final parts = loc.split(',');
+            final lat = double.tryParse(parts[0].trim());
+            final lng = double.tryParse(parts[1].trim());
+            if (lat != null && lng != null) {
+              await _fetchDirectionsToUser(user, LatLng(lat, lng));
+            }
           }
         }
       }
+    } catch (e) {
+      logger.e('Error getting location: $e');
     }
-  } catch (e) {
-    logger.e('Error getting location: $e');
   }
-}
 
   Future<void> _fetchDirectionsToUser(User user, LatLng destination) async {
     // final String configString = await rootBundle.loadString(
@@ -187,6 +231,12 @@ class _MapScreenPageState extends State<MapScreenPage> {
           'Selected Users on Map',
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => showFilterDialog(context),
+          ),
+        ],
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
@@ -195,8 +245,8 @@ class _MapScreenPageState extends State<MapScreenPage> {
         ),
         onMapCreated: (controller) => _mapController = controller,
         myLocationEnabled: true,
-        markers: _markers,
-        polylines: _userDirections.entries.map((entry) {
+        markers: _showAllUsers ? _markers : {},
+        polylines: _showRoute ? _userDirections.entries.map((entry) {
           return Polyline(
             polylineId: PolylineId(entry.key),
             color:
@@ -209,7 +259,7 @@ class _MapScreenPageState extends State<MapScreenPage> {
                 .map((e) => LatLng(e.latitude, e.longitude))
                 .toList(),
           );
-        }).toSet(),
+        }).toSet() : {},
       ),
     );
   }
