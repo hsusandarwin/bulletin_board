@@ -18,44 +18,18 @@ jobs:
         run: |
           curl -X POST "${{ secrets.TEAMS_WEBHOOK }}" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"text\":\"🐛 New Issue
-
-Title: ${{ github.event.issue.title }}
-
-Created by: ${{ github.event.issue.user.login }}
-
-${{ github.event.issue.html_url }}\"
-          }"
+          -d "{\"text\":\"🐛 New Issue: ${{ github.event.issue.title }} by ${{ github.event.issue.user.login }} ${{ github.event.issue.html_url }}\"}"
 
       - name: Notify PR Opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: |
           curl -X POST "${{ secrets.TEAMS_WEBHOOK }}" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"text\":\"🔀 Pull Request Opened
-
-Title: ${{ github.event.pull_request.title }}
-
-Author: ${{ github.event.pull_request.user.login }}
-
-${{ github.event.pull_request.html_url }}\"
-          }"
+          -d "{\"text\":\"🔀 Pull Request Opened: ${{ github.event.pull_request.title }} by ${{ github.event.pull_request.user.login }} ${{ github.event.pull_request.html_url }}\"}"
 
       - name: Notify PR Merged
-        if: github.event_name == 'pull_request' &&
-            github.event.pull_request.merged == true
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
         run: |
           curl -X POST "${{ secrets.TEAMS_WEBHOOK }}" \
           -H "Content-Type: application/json" \
-          -d "{
-            \"text\":\"✅ Pull Request Merged
-
-Title: ${{ github.event.pull_request.title }}
-
-Merged by: ${{ github.event.pull_request.merged_by.login }}
-
-${{ github.event.pull_request.html_url }}\"
-          }"
-          
+          -d "{\"text\":\"✅ Pull Request Merged: ${{ github.event.pull_request.title }} by ${{ github.event.pull_request.merged_by.login }} ${{ github.event.pull_request.html_url }}\"}"
